@@ -1,4 +1,4 @@
-# GB_UE_Basics // Основы работы с Unreal Engine
+# GB_UE_Basics // Основы работы с Unreal Engine :video_game:
  Introduction. Preparing for Unreal Engine 4 Development
 
 ## Урок 1. Введение. Подготовка к разработке на Unreal Engine 4
