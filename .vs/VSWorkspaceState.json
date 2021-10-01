@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Tankogeddon",
+    "\\Tankogeddon\\Source",
+    "\\Tankogeddon\\Source\\Tankogeddon",
+    "\\Tankogeddon\\Source\\Tankogeddon\\Private",
+    "\\Tankogeddon\\Source\\Tankogeddon\\Private\\Player",
+    "\\Tankogeddon\\Source\\Tankogeddon\\Public",
+    "\\Tankogeddon\\Source\\Tankogeddon\\Public\\Player"
+  ],
+  "SelectedNode": "\\Tankogeddon\\Source\\Tankogeddon\\Public\\Player\\TPlayerController.h",
+  "PreviewInSolutionExplorer": false
+}
