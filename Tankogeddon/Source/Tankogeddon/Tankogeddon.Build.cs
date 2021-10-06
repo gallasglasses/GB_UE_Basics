@@ -21,7 +21,8 @@ public class Tankogeddon : ModuleRules
 		PublicIncludePaths.AddRange(new string[]
 		{
 			"Tankogeddon/Public/Player",
-			"Tankogeddon"
+			"Tankogeddon/Public/Weapon",
+			"Tankogeddon/Public"
 		});
 
 		// Uncomment if you are using Slate UI

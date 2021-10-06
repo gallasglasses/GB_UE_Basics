@@ -2,9 +2,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/TPawn.h"
+#include "..\..\Public\Weapon\TCannon.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetMathLibrary.h"
+
+DEFINE_LOG_CATEGORY(LogPawn);
 
 // Sets default values
 ATPawn::ATPawn()
@@ -30,12 +36,17 @@ ATPawn::ATPawn()
 
     Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
     Camera->SetupAttachment(SpringArm);
+
+	CannonSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Cannon spawn point"));
+    CannonSpawnPoint->SetupAttachment(S_TTurret);
 }
 
 // Called when the game starts or when spawned
 void ATPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+    SetupCannon();
 }
 
 // Called every frame
@@ -44,16 +55,22 @@ void ATPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     // forward or backward movement
-    FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TAxisMoveForward * MoveSpeed * DeltaTime;
+    TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness);
+    FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TCurrentAxisMoveForward * MoveSpeed * DeltaTime;
     SetActorLocation(NewLocation);
 
-    // movement to the right or left
-    /*NewLocation = GetActorLocation() + GetActorRightVector() * MoveSpeed * TAxisMoveRight * DeltaTime;
-    SetActorLocation(NewLocation);*/
-
     //rotation movement
-    float NewYawRotation = GetActorRotation().Yaw + TAxisMoveRight * RotationSpeed * DeltaTime;
-    SetActorRotation(FRotator(0, NewYawRotation, 0));
+    TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness);
+    float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
+    SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
+   
+    UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
+
+	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TurretTargetPosition);
+	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
+	TargetRotation.Roll = CurrentRotation.Roll;
+	TargetRotation.Pitch = CurrentRotation.Pitch;
+    S_TTurret->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TurretRotationSmoothness));
 }
 
 void ATPawn::MoveForward(float Amount)
@@ -61,7 +78,34 @@ void ATPawn::MoveForward(float Amount)
     TAxisMoveForward = Amount;
 }
 
-void ATPawn::MoveRight(float Amount)
+void ATPawn::RotateRight(float Amount)
 {
-    TAxisMoveRight = Amount;
+    TAxisRotateRight = Amount;
+}
+
+void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
+{
+    TurretTargetPosition = TargetPosition;
+}
+
+void ATPawn::Fire()
+{
+    if (TCannon)
+    {
+        TCannon->Fire();
+    }
+}
+
+void ATPawn::SetupCannon()
+{
+	if (TCannon)
+	{
+        TCannon->Destroy();
+	}
+
+	FActorSpawnParameters Params;
+	Params.Instigator = this;
+	Params.Owner = this;
+    TCannon = GetWorld()->SpawnActor<ATCannon>(DefaultCannonClass, Params);
+    TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 }
