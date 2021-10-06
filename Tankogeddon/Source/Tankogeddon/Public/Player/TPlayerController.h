@@ -20,10 +20,13 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 private:
 	UPROPERTY()
 		ATPawn* TPawn;
 
 	void MoveForward(float Amount);
-	void MoveRight(float Amount);
+	void RotateRight(float Amount);
+	void Fire();
 };

@@ -7,10 +7,14 @@
 #include "GameFramework/Pawn.h"
 #include "TPawn.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
+
 class UStaticMeshComponent;
 class UStaticMeshComponent;
 class UCameraComponent;
 class USpringArmComponent;
+class UArrowComponent;
+class ATCannon;
 
 UCLASS()
 class TANKOGEDDON_API ATPawn : public APawn
@@ -37,11 +41,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 		UCameraComponent* Camera;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UArrowComponent* CannonSpawnPoint;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float MoveSpeed = 1000.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float RotationSpeed = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+		float MovementSmoothness = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+		float RotationSmoothness = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+		float TurretRotationSmoothness = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+		TSubclassOf<ATCannon> DefaultCannonClass;
 
 public:	
 	// Called every frame
@@ -51,11 +70,24 @@ public:
 		void MoveForward(float Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
-		void MoveRight(float Amount);
+		void RotateRight(float Amount);
 
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void SetTurretTargetPosition(const FVector& TargetPosition);
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void Fire();
 
 private:
-	float TAxisMoveForward = 0.0f;
-	float TAxisMoveRight = 0.0f;
+	UPROPERTY()
+		ATCannon* TCannon = nullptr;
 
+	void SetupCannon();
+
+	FVector TurretTargetPosition;
+
+	float TAxisMoveForward = 0.0f;
+	float TAxisRotateRight = 0.0f;
+	float TCurrentAxisMoveForward = 0.0f;
+	float TCurrentAxisRotateRight = 0.0f;
 };
