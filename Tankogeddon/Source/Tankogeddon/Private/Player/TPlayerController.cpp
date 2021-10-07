@@ -22,6 +22,7 @@ void ATPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("MoveForward", this, &ATPlayerController::MoveForward);
 	InputComponent->BindAxis("RotateRight", this, &ATPlayerController::RotateRight);
     InputComponent->BindAction("Fire", IE_Pressed, this, &ATPlayerController::Fire);
+	InputComponent->BindAction("RifleFire", IE_Pressed, this, &ATPlayerController::StartRifleFire);
 }
 
 void ATPlayerController::Tick(float DeltaSeconds)
@@ -68,5 +69,13 @@ void ATPlayerController::Fire()
 	if (TPawn)
 	{
 		TPawn->Fire();
+	}
+}
+
+void ATPlayerController::StartRifleFire()
+{
+	if (TPawn)
+	{
+		TPawn->StartRifleFire();
 	}
 }

@@ -55,12 +55,12 @@ void ATPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     // forward or backward movement
-    TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness);
+    //TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness);
     FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TCurrentAxisMoveForward * MoveSpeed * DeltaTime;
     SetActorLocation(NewLocation);
 
     //rotation movement
-    TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness);
+    //TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness);
     float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
     SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
    
@@ -70,17 +70,19 @@ void ATPawn::Tick(float DeltaTime)
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
 	TargetRotation.Pitch = CurrentRotation.Pitch;
-    S_TTurret->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TurretRotationSmoothness));
+    S_TTurret->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed));
 }
 
 void ATPawn::MoveForward(float Amount)
 {
     TAxisMoveForward = Amount;
+    TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness * GetWorld()->DeltaTimeSeconds);
 }
 
 void ATPawn::RotateRight(float Amount)
 {
     TAxisRotateRight = Amount;
+    TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness * GetWorld()->DeltaTimeSeconds);
 }
 
 void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
@@ -90,9 +92,17 @@ void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 
 void ATPawn::Fire()
 {
+	if (TCannon)
+	{
+		TCannon->Fire();
+	}
+}
+
+void ATPawn::StartRifleFire()
+{
     if (TCannon)
     {
-        TCannon->Fire();
+        TCannon->StartRifleFire();
     }
 }
 

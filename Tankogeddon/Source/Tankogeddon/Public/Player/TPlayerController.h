@@ -17,7 +17,6 @@ class TANKOGEDDON_API ATPlayerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
-	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
 
 	virtual void Tick(float DeltaSeconds) override;
@@ -29,4 +28,5 @@ private:
 	void MoveForward(float Amount);
 	void RotateRight(float Amount);
 	void Fire();
+	void StartRifleFire();
 };

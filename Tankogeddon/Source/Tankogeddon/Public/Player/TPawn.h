@@ -56,8 +56,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float RotationSmoothness = 0.5f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
-		float TurretRotationSmoothness = 0.5f;
+	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
+		float TurretRotationSmoothness = 0.5f;*/
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		TSubclassOf<ATCannon> DefaultCannonClass;
@@ -77,6 +77,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void Fire();
+		
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void StartRifleFire();
 
 private:
 	UPROPERTY()
