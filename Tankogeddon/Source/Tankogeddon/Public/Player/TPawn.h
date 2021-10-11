@@ -81,11 +81,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void StartRifleFire();
 
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void SetupCannon(TSubclassOf<ATCannon> InCannonClass);
+
+	ATCannon* GetCannon();
+
 private:
 	UPROPERTY()
 		ATCannon* TCannon = nullptr;
-
-	void SetupCannon();
 
 	FVector TurretTargetPosition;
 

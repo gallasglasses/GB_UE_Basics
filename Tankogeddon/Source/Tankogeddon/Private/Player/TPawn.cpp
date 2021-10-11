@@ -46,7 +46,7 @@ void ATPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-    SetupCannon();
+    SetupCannon(DefaultCannonClass);
 }
 
 // Called every frame
@@ -57,7 +57,7 @@ void ATPawn::Tick(float DeltaTime)
     // forward or backward movement
     //TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness);
     FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TCurrentAxisMoveForward * MoveSpeed * DeltaTime;
-    SetActorLocation(NewLocation);
+    SetActorLocation(NewLocation, true);
 
     //rotation movement
     //TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness);
@@ -70,7 +70,7 @@ void ATPawn::Tick(float DeltaTime)
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
 	TargetRotation.Pitch = CurrentRotation.Pitch;
-    S_TTurret->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed));
+    S_TTurret->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed), true);
 }
 
 void ATPawn::MoveForward(float Amount)
@@ -106,16 +106,24 @@ void ATPawn::StartRifleFire()
     }
 }
 
-void ATPawn::SetupCannon()
+void ATPawn::SetupCannon(TSubclassOf<ATCannon> InCannonClass)
 {
 	if (TCannon)
 	{
         TCannon->Destroy();
 	}
 
-	FActorSpawnParameters Params;
-	Params.Instigator = this;
-	Params.Owner = this;
-    TCannon = GetWorld()->SpawnActor<ATCannon>(DefaultCannonClass, Params);
-    TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    if (InCannonClass)
+    {
+        FActorSpawnParameters Params;
+        Params.Instigator = this;
+        Params.Owner = this;
+        TCannon = GetWorld()->SpawnActor<ATCannon>(DefaultCannonClass, Params);
+        TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    }
+}
+
+ATCannon* ATPawn::GetCannon()
+{
+    return TCannon;
 }

@@ -45,7 +45,13 @@ protected:
 		TSubclassOf<ATProjectile> ProjectileClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
-		FAmmoData DefaultAmmoData{10, 10, false};
+		FAmmoData DefaultProjectileAmmoData{5, 3, false};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
+		FAmmoData DefaultTraceAmmoData {1, 1, false};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+		FAmmoData DefaultRifleAmmoData {10, 10, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireRate = 1.0f;
@@ -62,15 +68,21 @@ protected:
 private:
 	FTimerHandle ReloadTimerHandle;
 	bool bReadyToFire = false;
-	FAmmoData CurrentAmmo;
+	bool bRifleFire = false;
+	bool bProjectileFire = false;
+	bool bTraceFire = false;
 
 public:
 	ATCannon();
 
 	void Fire();
 	void StartRifleFire();
-	bool IsReadyToFire();
 	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+
+	bool IsReadyToFire();
+	bool AddAmmo(TSubclassOf<ATCannon> CannonClass, int32 AmmoAmount);
+
+	FAmmoData CurrentAmmo, CurrentRifleAmmo, CurrentProjectileAmmo, CurrentTraceAmmo;
 
 protected:
 	virtual void BeginPlay() override;
@@ -80,11 +92,11 @@ protected:
 	void RifleShot();
 	void Shot();
 	void Reload();
-	void DecreaseAmmo();
-	void ChangeClip();
-	void LogAmmo();
+	void DecreaseAmmo(FAmmoData& CurrentAmmo);
+	void ChangeClip(FAmmoData& CurrentAmmo);
+	void LogAmmo(FAmmoData& CurrentAmmo);
 
-	bool IsAmmoEmpty() const;
-	bool IsClipEmpty() const;
+	bool IsAmmoEmpty(FAmmoData& CurrentAmmo) const;
+	bool IsClipEmpty(FAmmoData& CurrentAmmo) const;
 
 };
