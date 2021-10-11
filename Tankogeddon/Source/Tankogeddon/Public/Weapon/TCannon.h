@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class UArrowComponent;
+class ATProjectile;
 
 USTRUCT(BlueprintType)
 struct FAmmoData
@@ -40,19 +41,22 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		ECannonType Type = ECannonType::FireProjectile;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
+		TSubclassOf<ATProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		FAmmoData DefaultAmmoData{10, 10, false};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireRate = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		float FireRifleRate = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
-		float FireRange = 1000.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
+		float FireRange = 3000.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireDamage = 1.0f;
 
 private:
@@ -73,7 +77,8 @@ protected:
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
-	void MakeShot();
+	void RifleShot();
+	void Shot();
 	void Reload();
 	void DecreaseAmmo();
 	void ChangeClip();

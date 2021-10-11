@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/ArrowComponent.h"
 #include "DrawDebugHelpers.h"
+#include "TProjectile.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCannon, All, All);
 
@@ -52,16 +53,8 @@ void ATCannon::Fire()
 	}
 	bReadyToFire = false;
 
-	if (Type == ECannonType::FireProjectile)
-	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));
-	}
-	else if (Type == ECannonType::FireTrace)
-	{
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire trace"));
-	}
+	Shot();
 
-	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ATCannon::Reload, 2.0f / FireRate, false);
 }
 
 void ATCannon::StartRifleFire()
@@ -77,8 +70,8 @@ void ATCannon::StartRifleFire()
 	}
 	bReadyToFire = false;
 
-	MakeShot();
-	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ATCannon::MakeShot, 1.0f / FireRifleRate, true);
+	RifleShot();
+	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ATCannon::RifleShot, 1.0f / FireRifleRate, true);
 }
 
 bool ATCannon::IsReadyToFire()
@@ -103,13 +96,13 @@ void ATCannon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const F
 	{
 		return;
 	}
-	FCollisionQueryParams CollisionParams;
+	FCollisionQueryParams CollisionParams = FCollisionQueryParams(FName(TEXT("Fire")), true, this);;
 	CollisionParams.AddIgnoredActor(GetOwner());
-
+	CollisionParams.bReturnPhysicalMaterial = false;
 	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
 
-void ATCannon::MakeShot()
+void ATCannon::RifleShot()
 {
 	if (!GetWorld() || IsAmmoEmpty())
 	{
@@ -123,6 +116,12 @@ void ATCannon::MakeShot()
 	FHitResult HitResult;
 	MakeHit(HitResult, TraceStart, TraceEnd);
 
+	ATProjectile* Projectile = GetWorld()->SpawnActor<ATProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
+	if (Projectile)
+	{
+		Projectile->Start();
+	}
+
 	if (HitResult.bBlockingHit)
 	{
 		DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Red, false, 1.0f, 0, 3.0f);
@@ -135,6 +134,47 @@ void ATCannon::MakeShot()
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Rifle fire projectile"));
 	}
 	DecreaseAmmo();
+}
+
+void ATCannon::Shot()
+{
+	if (Type == ECannonType::FireProjectile)
+	{
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));
+
+		ATProjectile* Projectile = GetWorld()->SpawnActor<ATProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
+		if (Projectile)
+		{
+			Projectile->Start();
+		}
+
+	}
+	else if (Type == ECannonType::FireTrace)
+	{
+		FVector TraceStart, TraceEnd;
+		GetTraceData(TraceStart, TraceEnd);
+
+		FHitResult HitResult;
+		MakeHit(HitResult, TraceStart, TraceEnd);
+
+		if (HitResult.bBlockingHit)
+		{
+			DrawDebugLine(GetWorld(), TraceStart, HitResult.ImpactPoint, FColor::Green, false, 1.0f, 0, 10.0f);
+			if (HitResult.Actor.IsValid() && HitResult.Component.IsValid(), HitResult.Component->GetCollisionObjectType() == ECC_Destructible)
+			{
+				HitResult.Actor->Destroy();
+			}
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire trace on object"));
+		}
+		else
+		{
+			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 1.0f, 0, 10.0f);
+			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Fire trace"));
+		}
+
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ATCannon::Reload, 2.0f / FireRate, false);
 }
 
 void ATCannon::DecreaseAmmo()
