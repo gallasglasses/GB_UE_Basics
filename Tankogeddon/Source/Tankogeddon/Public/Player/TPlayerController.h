@@ -29,4 +29,5 @@ private:
 	void RotateRight(float Amount);
 	void Fire();
 	void StartRifleFire();
+	void NextWeapon();
 };

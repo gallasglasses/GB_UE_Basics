@@ -84,6 +84,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void SetupCannon(TSubclassOf<ATCannon> InCannonClass);
 
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void NextWeapon();
+
 	ATCannon* GetCannon();
 
 private:

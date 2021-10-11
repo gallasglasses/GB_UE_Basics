@@ -123,6 +123,11 @@ void ATPawn::SetupCannon(TSubclassOf<ATCannon> InCannonClass)
     }
 }
 
+void ATPawn::NextWeapon()
+{
+    
+}
+
 ATCannon* ATPawn::GetCannon()
 {
     return TCannon;
