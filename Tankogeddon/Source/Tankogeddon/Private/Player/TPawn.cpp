@@ -10,7 +10,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
 
-DEFINE_LOG_CATEGORY(LogPawn);
+//DEFINE_LOG_CATEGORY(LogPawn);
 
 // Sets default values
 ATPawn::ATPawn()
@@ -64,7 +64,7 @@ void ATPawn::Tick(float DeltaTime)
     float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
     SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
    
-    UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
+    //UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(S_TTurret->GetComponentLocation(), TurretTargetPosition);
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
@@ -107,25 +107,33 @@ void ATPawn::StartRifleFire()
 }
 
 void ATPawn::SetupCannon(TSubclassOf<ATCannon> InCannonClass)
-{
+{/*
 	if (TCannon)
 	{
-        TCannon->Destroy();
-	}
-
+		TCannon->Destroy();
+	}*/
     if (InCannonClass)
     {
         FActorSpawnParameters Params;
         Params.Instigator = this;
         Params.Owner = this;
-        TCannon = GetWorld()->SpawnActor<ATCannon>(DefaultCannonClass, Params);
-        TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        TCannon = GetWorld()->SpawnActor<ATCannon>(InCannonClass, Params);
+		TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
     }
 }
 
 void ATPawn::NextWeapon()
 {
-    
+    if (TCannon->GetCannonType() == ECannonType::FireProjectile )
+    {
+        TCannon->SetCannonType(ECannonType::FireTrace);
+        GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireTrace"));
+    }
+    else if (TCannon->GetCannonType() == ECannonType::FireTrace)
+    {
+        TCannon->SetCannonType(ECannonType::FireProjectile);
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireProjectile"));
+    }
 }
 
 ATCannon* ATPawn::GetCannon()

@@ -45,10 +45,10 @@ protected:
 		TSubclassOf<ATProjectile> ProjectileClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
-		FAmmoData DefaultProjectileAmmoData{5, 3, false};
+		FAmmoData DefaultProjectileAmmoData{5, 1, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
-		FAmmoData DefaultTraceAmmoData {1, 1, false};
+		FAmmoData DefaultTraceAmmoData {1, 0, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		FAmmoData DefaultRifleAmmoData {10, 10, false};
@@ -75,14 +75,27 @@ private:
 public:
 	ATCannon();
 
+	UFUNCTION()
+	ECannonType GetCannonType() const;
+
 	void Fire();
 	void StartRifleFire();
 	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+	void SetCannonType(ECannonType Type);
+	void AddAmmo(ECannonType AmmoType, int32 AmmoAmount);
 
 	bool IsReadyToFire();
-	bool AddAmmo(TSubclassOf<ATCannon> CannonClass, int32 AmmoAmount);
+	UFUNCTION()
+	FAmmoData GetRifleAmmo() const { return DefaultRifleAmmoData; }
+	UFUNCTION()
+	FAmmoData GetTraceAmmo() const { return DefaultTraceAmmoData; }
+	UFUNCTION()
+	FAmmoData GetProjectileAmmo() const { return DefaultProjectileAmmoData; }
 
-	FAmmoData CurrentAmmo, CurrentRifleAmmo, CurrentProjectileAmmo, CurrentTraceAmmo;
+	FAmmoData CurrentRifleAmmo = DefaultRifleAmmoData;
+	FAmmoData CurrentProjectileAmmo = DefaultProjectileAmmoData;
+	FAmmoData CurrentTraceAmmo = DefaultTraceAmmoData;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -92,11 +105,11 @@ protected:
 	void RifleShot();
 	void Shot();
 	void Reload();
-	void DecreaseAmmo(FAmmoData& CurrentAmmo);
-	void ChangeClip(FAmmoData& CurrentAmmo);
-	void LogAmmo(FAmmoData& CurrentAmmo);
+	void DecreaseAmmo(FAmmoData& CurrentDefaultAmmo);
+	void ChangeClip(FAmmoData& CurrentDefaultAmmo);
+	void LogAmmo(FAmmoData& CurrentDefaultAmmo);
 
-	bool IsAmmoEmpty(FAmmoData& CurrentAmmo) const;
-	bool IsClipEmpty(FAmmoData& CurrentAmmo) const;
+	bool IsAmmoEmpty(FAmmoData CurrentDefaultAmmo) const;
+	bool IsClipEmpty(FAmmoData CurrentDefaultAmmo) const;
 
 };

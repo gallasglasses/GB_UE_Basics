@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "TPawn.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
+//DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
 
 class UStaticMeshComponent;
 class UStaticMeshComponent;

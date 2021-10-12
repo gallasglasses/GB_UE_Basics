@@ -15,10 +15,10 @@ void ATCannon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bReadyToFire = true;
+	bReadyToFire = true;/*
 	CurrentRifleAmmo = DefaultRifleAmmoData;
 	CurrentProjectileAmmo = DefaultProjectileAmmoData;
-	CurrentTraceAmmo = DefaultTraceAmmoData;
+	CurrentTraceAmmo = DefaultTraceAmmoData;*/
 }
 
 ATCannon::ATCannon()
@@ -40,6 +40,11 @@ void ATCannon::EndPlay(EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 
 	GetWorld()->GetTimerManager().ClearTimer(ReloadTimerHandle);
+}
+
+ECannonType ATCannon::GetCannonType() const
+{
+	return Type;
 }
 
 void ATCannon::Fire()
@@ -65,7 +70,7 @@ void ATCannon::StartRifleFire()
 	{
 		return;
 	}
-	if (IsAmmoEmpty(CurrentAmmo))
+	if (IsAmmoEmpty(CurrentRifleAmmo))
 	{
 		Reload();
 		return;
@@ -81,54 +86,38 @@ bool ATCannon::IsReadyToFire()
 	return bReadyToFire;
 }
 
-bool ATCannon::AddAmmo(TSubclassOf<ATCannon> CannonClass, int32 AmmoAmount)
+void ATCannon::AddAmmo(ECannonType AmmoType, int32 AmmoAmount)
 {
-	FAmmoData DefaultAmmoData;
-	if (bProjectileFire)
+
+	if (AmmoType == ECannonType::FireProjectile)
 	{
-		DefaultAmmoData.Bullets = DefaultProjectileAmmoData.Bullets;
+		CurrentProjectileAmmo.Bullets = FMath::Clamp(CurrentProjectileAmmo.Bullets + 1, 0, DefaultProjectileAmmoData.Bullets);
 	}
-	if (bTraceFire)
+	else if (AmmoType == ECannonType::FireTrace)
 	{
-		DefaultAmmoData.Bullets = DefaultTraceAmmoData.Bullets;
+		CurrentTraceAmmo.Bullets = FMath::Clamp(CurrentTraceAmmo.Bullets + 1, 0, DefaultTraceAmmoData.Bullets);
 	}
-	if (bRifleFire)
+	else if (AmmoType == ECannonType::FireRifle)
 	{
-		DefaultAmmoData.Bullets = DefaultRifleAmmoData.Bullets;
+		CurrentRifleAmmo.Bullets = FMath::Clamp(CurrentRifleAmmo.Bullets + 1, 0, DefaultRifleAmmoData.Bullets);
 	}
-	if (CurrentAmmo.Bullets == DefaultAmmoData.Bullets || CurrentAmmo.bInfinite)
-	{
-		return false;
-	}
-	if (CurrentAmmo.Bullets + AmmoAmount > DefaultAmmoData.Bullets)
-	{
-		int32 CountAmmo = DefaultAmmoData.Bullets - CurrentAmmo.Bullets;
-		
-		if (CurrentAmmo.Clips < DefaultAmmoData.Clips)
-		{
-			CurrentAmmo.Clips++;
-			CurrentAmmo.Bullets = AmmoAmount - CountAmmo;
-		}
-		else if(CurrentAmmo.Clips == DefaultAmmoData.Clips)
-		{
-			CurrentAmmo.Bullets = DefaultAmmoData.Bullets;
-		}
-	}
-	else if(CurrentAmmo.Bullets + AmmoAmount == DefaultAmmoData.Bullets)
-	{
-		CurrentAmmo.Bullets = DefaultAmmoData.Bullets;
-	}
-	else
-	{
-		CurrentAmmo.Bullets += AmmoAmount;
-	}
-	return true;
+	/*int32 CountAmmo, CountClips;
+	CountClips = AmmoAmount / DefaultAmmoData.Bullets;
+	CountAmmo = DefaultAmmoData.Bullets - CurrentAmmo.Bullets;
+
+	CurrentAmmo.Clips = FMath::Clamp(CurrentAmmo.Clips + CountClips, 0, DefaultAmmoData.Clips);
+	CurrentAmmo.Bullets = FMath::Clamp(CurrentAmmo.Bullets + AmmoAmount - CountAmmo, 0, DefaultAmmoData.Bullets);*/
 }
 
 void ATCannon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const
 {
 	TraceStart = ProjectileSpawnPoint->GetComponentLocation();
 	TraceEnd = TraceStart + FireRange * ProjectileSpawnPoint->GetForwardVector();
+}
+
+void ATCannon::SetCannonType(ECannonType CannonType)
+{
+	Type = CannonType;
 }
 
 void ATCannon::Reload()
@@ -150,9 +139,18 @@ void ATCannon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, const F
 
 void ATCannon::RifleShot()
 {
-	bRifleFire = true;
-	CurrentAmmo = CurrentRifleAmmo;
-	if (!GetWorld() || IsAmmoEmpty(CurrentAmmo))
+	if (GetCannonType() == ECannonType::FireTrace)
+	{
+		bTraceFire = !bTraceFire;
+	}
+	else //if (GetCannonType() == ECannonType::FireProjectile)
+	{
+		bProjectileFire = !bProjectileFire;
+	}
+	SetCannonType(ECannonType::FireRifle);
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireTrace"));
+
+	if (!GetWorld() || IsAmmoEmpty(CurrentRifleAmmo))
 	{
 		Reload();
 		return;
@@ -181,21 +179,30 @@ void ATCannon::RifleShot()
 		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 1.0f, 0, 3.0f);
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Rifle fire projectile"));
 	}
-	DecreaseAmmo(CurrentAmmo);
-	bRifleFire = false;
+	DecreaseAmmo(CurrentRifleAmmo);
+	if (bProjectileFire)
+	{
+		SetCannonType(ECannonType::FireProjectile);
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireProjectile"));
+		bProjectileFire = !bProjectileFire;
+	}
+	else if (bTraceFire)
+	{
+		SetCannonType(ECannonType::FireTrace);
+		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireTrace"));
+		bTraceFire = !bTraceFire;
+	}
 }
 
 void ATCannon::Shot()
 {
 	if (Type == ECannonType::FireProjectile)
 	{
-		CurrentAmmo = CurrentProjectileAmmo;
-		if (IsAmmoEmpty(CurrentAmmo))
+		if (IsAmmoEmpty(CurrentProjectileAmmo))
 		{
 			Reload();
 			return;
 		}
-		bProjectileFire = true;
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));
 
 		ATProjectile* Projectile = GetWorld()->SpawnActor<ATProjectile>(ProjectileClass, ProjectileSpawnPoint->GetComponentLocation(), ProjectileSpawnPoint->GetComponentRotation());
@@ -203,18 +210,15 @@ void ATCannon::Shot()
 		{
 			Projectile->Start();
 		}
-		DecreaseAmmo(CurrentAmmo);
-		bProjectileFire = false;
+		DecreaseAmmo(CurrentProjectileAmmo);
 	}
 	else if (Type == ECannonType::FireTrace)
 	{
-		CurrentAmmo = CurrentTraceAmmo;
-		if (IsAmmoEmpty(CurrentAmmo))
+		if (IsAmmoEmpty(CurrentTraceAmmo))
 		{
 			Reload();
 			return;
 		}
-		bTraceFire = true;
 		FVector TraceStart, TraceEnd;
 		GetTraceData(TraceStart, TraceEnd);
 
@@ -235,63 +239,62 @@ void ATCannon::Shot()
 			DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Yellow, false, 1.0f, 0, 10.0f);
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Yellow, TEXT("Fire trace"));
 		}
-		DecreaseAmmo(CurrentAmmo);
-		bTraceFire = false;
+		DecreaseAmmo(CurrentTraceAmmo);
 	}
 	GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, this, &ATCannon::Reload, 1.0f / FireRate, false);
 }
 
-void ATCannon::DecreaseAmmo(FAmmoData& CurrentAmmo)
+void ATCannon::DecreaseAmmo(FAmmoData& CurrentDefaultAmmo)
 {
-	CurrentAmmo.Bullets--;
-	LogAmmo(CurrentAmmo);
+	CurrentDefaultAmmo.Bullets--;
+	LogAmmo(CurrentDefaultAmmo);
 
-	if (IsClipEmpty(CurrentAmmo) && !IsAmmoEmpty(CurrentAmmo))
+	if (IsClipEmpty(CurrentDefaultAmmo) && !IsAmmoEmpty(CurrentDefaultAmmo))
 	{
-		ChangeClip(CurrentAmmo);
+		ChangeClip(CurrentDefaultAmmo);
 	}
 }
 
-void ATCannon::ChangeClip(FAmmoData& CurrentAmmo)
+void ATCannon::ChangeClip(FAmmoData& CurrentDefaultAmmo)
 {
-	FAmmoData DefaultAmmoData;
-	if (bProjectileFire)
+	FAmmoData DefaultAmmoData = {0,0,false};
+	if (Type == ECannonType::FireProjectile)
 	{
-		DefaultAmmoData.Bullets = DefaultProjectileAmmoData.Bullets;
+		DefaultAmmoData = DefaultProjectileAmmoData;
 	}
-	if (bTraceFire)
+	else if (Type == ECannonType::FireTrace)
 	{
-		DefaultAmmoData.Bullets = DefaultTraceAmmoData.Bullets;
+		DefaultAmmoData = DefaultTraceAmmoData;
 	}
-	if (bRifleFire)
+	else if (Type == ECannonType::FireRifle)
 	{
-		DefaultAmmoData.Bullets = DefaultRifleAmmoData.Bullets;
+		DefaultAmmoData = DefaultRifleAmmoData;
 	}
-	CurrentAmmo.Bullets = DefaultAmmoData.Bullets;
-	if (!CurrentAmmo.bInfinite)
+	CurrentDefaultAmmo.Bullets = DefaultAmmoData.Bullets;
+	if (!CurrentDefaultAmmo.bInfinite)
 	{
-		CurrentAmmo.Clips--;
+		CurrentDefaultAmmo.Clips--;
 	}
 	UE_LOG(LogCannon, Display, TEXT("Change Clip"));
 	Reload();
 	GetWorld()->GetTimerManager().ClearTimer(ReloadTimerHandle);
 }
 
-void ATCannon::LogAmmo(FAmmoData& CurrentAmmo)
+void ATCannon::LogAmmo(FAmmoData& CurrentDefaultAmmo)
 {
-	FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " / ";
-	AmmoInfo += CurrentAmmo.bInfinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
+	FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentDefaultAmmo.Bullets) + " / ";
+	AmmoInfo += CurrentDefaultAmmo.bInfinite ? "Infinite" : FString::FromInt(CurrentDefaultAmmo.Clips);
 	UE_LOG(LogCannon, Display, TEXT("%s"), *AmmoInfo);
 
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Rifle fire projectile %d / %d "), CurrentAmmo.Bullets, CurrentAmmo.Clips));
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Projectile %d / %d "), CurrentDefaultAmmo.Bullets, CurrentDefaultAmmo.Clips));
 }
 
-bool ATCannon::IsAmmoEmpty(FAmmoData& CurrentAmmo) const
+bool ATCannon::IsAmmoEmpty(FAmmoData CurrentDefaultAmmo) const
 {
-	return !CurrentAmmo.bInfinite && CurrentAmmo.Clips == 0 && IsClipEmpty(CurrentAmmo);
+	return !CurrentDefaultAmmo.bInfinite && CurrentDefaultAmmo.Clips == 0 && IsClipEmpty(CurrentDefaultAmmo);
 }
 
-bool ATCannon::IsClipEmpty(FAmmoData& CurrentAmmo) const
+bool ATCannon::IsClipEmpty(FAmmoData CurrentDefaultAmmo) const
 {
-	return CurrentAmmo.Bullets == 0;
+	return CurrentDefaultAmmo.Bullets == 0;
 }

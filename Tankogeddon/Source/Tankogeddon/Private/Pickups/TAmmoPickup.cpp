@@ -21,14 +21,21 @@ ATAmmoPickup::ATAmmoPickup()
 void ATAmmoPickup::OnMeshOverlapBegin(class UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ATPawn* PlayerPawn = Cast<ATPawn>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	ATCannon* PlayerCannon = PlayerPawn->GetCannon();
+	
 	if (OtherActor == PlayerPawn)
 	{
 		PlayerPawn->SetupCannon(CannonClass);
-		bool bAddedAmmoPickup = PlayerCannon->AddAmmo(CannonClass, Bullets);
-		if (bAddedAmmoPickup)
+		ATCannon* PlayerCannon = PlayerPawn->GetCannon();
+		if (PlayerCannon && PlayerCannon->GetClass() == CannonClass)
 		{
-			Destroy();
+			PlayerCannon->AddAmmo(PlayerCannon->GetCannonType(), Bullets);
 		}
+		else
+		{
+			PlayerPawn->SetupCannon(CannonClass);
+			PlayerCannon = PlayerPawn->GetCannon();
+			PlayerCannon->AddAmmo(PlayerCannon->GetCannonType(), Bullets);
+		}
+		Destroy();
 	}
 }
