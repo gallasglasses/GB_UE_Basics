@@ -4,6 +4,7 @@
 #include "Player/TPlayerController.h"
 #include "Player/TPawn.h"
 #include "DrawDebugHelpers.h"
+#include "ActorPoolSubsystem.h"
 
 void ATPlayerController::BeginPlay()
 {
@@ -87,4 +88,9 @@ void ATPlayerController::NextWeapon()
     {
         TPawn->NextWeapon();
     }
+}
+
+void ATPlayerController::DumpActorPoolSubsystemStats()
+{
+	GetWorld()->GetSubsystem<UActorPoolSubsystem>()->DumpPoolStats();
 }

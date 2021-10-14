@@ -24,17 +24,16 @@ void ATAmmoPickup::OnMeshOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	
 	if (OtherActor == PlayerPawn)
 	{
-		PlayerPawn->SetupCannon(CannonClass);
-		ATCannon* PlayerCannon = PlayerPawn->GetCannon();
-		if (PlayerCannon && PlayerCannon->GetClass() == CannonClass)
+		ATCannon* Cannon = PlayerPawn->GetCannon();
+		if (Cannon && Cannon->GetClass() == CannonClass)
 		{
-			PlayerCannon->AddAmmo(PlayerCannon->GetCannonType(), Bullets);
+			Cannon->AddAmmo(Cannon->GetCannonType(), Bullets);
 		}
 		else
 		{
 			PlayerPawn->SetupCannon(CannonClass);
-			PlayerCannon = PlayerPawn->GetCannon();
-			PlayerCannon->AddAmmo(PlayerCannon->GetCannonType(), Bullets);
+			Cannon = PlayerPawn->GetCannon();
+			Cannon->AddAmmo(Cannon->GetCannonType(), Bullets);
 		}
 		Destroy();
 	}

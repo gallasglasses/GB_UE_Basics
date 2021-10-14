@@ -51,7 +51,7 @@ protected:
 		FAmmoData DefaultTraceAmmoData {1, 0, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
-		FAmmoData DefaultRifleAmmoData {10, 10, false};
+		FAmmoData DefaultRifleAmmoData {10, 10, true};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireRate = 1.0f;
@@ -83,14 +83,9 @@ public:
 	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
 	void SetCannonType(ECannonType Type);
 	void AddAmmo(ECannonType AmmoType, int32 AmmoAmount);
+	void SetVisibility(bool bIsVisible);
 
 	bool IsReadyToFire();
-	UFUNCTION()
-	FAmmoData GetRifleAmmo() const { return DefaultRifleAmmoData; }
-	UFUNCTION()
-	FAmmoData GetTraceAmmo() const { return DefaultTraceAmmoData; }
-	UFUNCTION()
-	FAmmoData GetProjectileAmmo() const { return DefaultProjectileAmmoData; }
 
 	FAmmoData CurrentRifleAmmo = DefaultRifleAmmoData;
 	FAmmoData CurrentProjectileAmmo = DefaultProjectileAmmoData;
@@ -108,7 +103,6 @@ protected:
 	void DecreaseAmmo(FAmmoData& CurrentDefaultAmmo);
 	void ChangeClip(FAmmoData& CurrentDefaultAmmo);
 	void LogAmmo(FAmmoData& CurrentDefaultAmmo);
-
 	bool IsAmmoEmpty(FAmmoData CurrentDefaultAmmo) const;
 	bool IsClipEmpty(FAmmoData CurrentDefaultAmmo) const;
 

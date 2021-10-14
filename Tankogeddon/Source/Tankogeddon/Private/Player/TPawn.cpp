@@ -92,51 +92,55 @@ void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 
 void ATPawn::Fire()
 {
-	if (TCannon)
+	if (TActiveCannon)
 	{
-		TCannon->Fire();
+		TActiveCannon->Fire();
 	}
 }
 
 void ATPawn::StartRifleFire()
 {
-    if (TCannon)
+    if (TActiveCannon)
     {
-        TCannon->StartRifleFire();
+        TActiveCannon->StartRifleFire();
     }
 }
 
 void ATPawn::SetupCannon(TSubclassOf<ATCannon> InCannonClass)
-{/*
-	if (TCannon)
+{
+	if (TActiveCannon && TActiveCannon->GetClass() != InCannonClass)
 	{
-		TCannon->Destroy();
-	}*/
-    if (InCannonClass)
-    {
-        FActorSpawnParameters Params;
-        Params.Instigator = this;
-        Params.Owner = this;
-        TCannon = GetWorld()->SpawnActor<ATCannon>(InCannonClass, Params);
-		TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    }
+        TInactiveCannon = TActiveCannon;
+	}
+	if (InCannonClass)
+	{
+		FActorSpawnParameters Params;
+		Params.Instigator = this;
+		Params.Owner = this;
+		TActiveCannon = GetWorld()->SpawnActor<ATCannon>(InCannonClass, Params);
+		TActiveCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
 }
 
 void ATPawn::NextWeapon()
 {
-    if (TCannon->GetCannonType() == ECannonType::FireProjectile )
+    if (TActiveCannon && TInactiveCannon)
     {
-        TCannon->SetCannonType(ECannonType::FireTrace);
-        GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireTrace"));
-    }
-    else if (TCannon->GetCannonType() == ECannonType::FireTrace)
-    {
-        TCannon->SetCannonType(ECannonType::FireProjectile);
-		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Silver, TEXT("Fire FireProjectile"));
+		Swap(TActiveCannon, TInactiveCannon);
+
+		if (TActiveCannon)
+		{
+			TActiveCannon->SetVisibility(true);
+		}
+
+		if (TInactiveCannon)
+		{
+			TInactiveCannon->SetVisibility(false);
+		}
     }
 }
 
 ATCannon* ATPawn::GetCannon()
 {
-    return TCannon;
+    return TActiveCannon;
 }

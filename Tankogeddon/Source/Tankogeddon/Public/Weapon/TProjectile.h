@@ -17,6 +17,7 @@ public:
 	// Sets default values for this actor's properties
 	ATProjectile();
 	void Start();
+	void Stop();
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:

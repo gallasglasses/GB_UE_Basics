@@ -87,11 +87,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void NextWeapon();
 
-	ATCannon* GetCannon();
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		ATCannon* GetCannon();
 
 private:
 	UPROPERTY()
-		ATCannon* TCannon = nullptr;
+		ATCannon* TActiveCannon = nullptr;
+
+	UPROPERTY()
+		ATCannon* TInactiveCannon = nullptr;
 
 	FVector TurretTargetPosition;
 
