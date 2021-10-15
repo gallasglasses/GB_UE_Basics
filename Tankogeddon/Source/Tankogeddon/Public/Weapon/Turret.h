@@ -2,17 +2,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Damageable.h"
 #include "Turret.generated.h"
 
 class UStaticMeshComponent;
 class UStaticMeshComponent;
 class UArrowComponent;
 class UBoxComponent;
+class UHealthComponent;
 class ATCannon;
 class APawn;
 
 UCLASS()
-class TANKOGEDDON_API ATurret : public AActor
+class TANKOGEDDON_API ATurret : public AActor, public IDamageable
 {
 	GENERATED_BODY()
 
@@ -32,6 +34,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UBoxComponent* HitCollider;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UHealthComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 		TSubclassOf<ATCannon> CannonClass;
@@ -57,6 +62,12 @@ protected:
 	bool CanFire();
 	void Fire();
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+		void OnHealthChanged(float Damage);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+		void OnDie();
+
 private:
 	UPROPERTY()
 		ATCannon* Cannon;
@@ -67,5 +78,5 @@ private:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	virtual void TakeDamage(const FDamageData& DamageData) override;
 };

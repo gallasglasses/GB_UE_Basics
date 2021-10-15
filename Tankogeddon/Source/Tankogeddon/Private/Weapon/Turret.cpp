@@ -11,6 +11,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "UObject/NoExportTypes.h"
 #include "../../Tankogeddon.h"
+#include "GameStructs.h"
+#include "HealthComponent.h"
 
 // Sets default values
 ATurret::ATurret()
@@ -42,6 +44,10 @@ ATurret::ATurret()
 	{
 		BodyMesh->SetStaticMesh(BodyMeshTemp);
 	}
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
+	HealthComponent->OnHealthChanged.AddDynamic(this, &ATurret::OnHealthChanged);
+	HealthComponent->OnDie.AddDynamic(this, &ATurret::OnDie);
 }
 
 // Called when the game starts or when spawned
@@ -113,6 +119,16 @@ void ATurret::Fire()
 	}
 }
 
+void ATurret::OnHealthChanged_Implementation(float Damage)
+{
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Turret %s taked damage:%f "), *GetName(), Damage));
+}
+
+void ATurret::OnDie_Implementation()
+{
+	Destroy();
+}
+
 // Called every frame
 void ATurret::Tick(float DeltaTime)
 {
@@ -125,3 +141,7 @@ void ATurret::Tick(float DeltaTime)
 
 }
 
+void ATurret::TakeDamage(const FDamageData& DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
+}

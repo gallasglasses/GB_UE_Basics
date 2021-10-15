@@ -27,6 +27,7 @@ void ATAmmoPickup::OnMeshOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 		ATCannon* Cannon = PlayerPawn->GetCannon();
 		if (Cannon && Cannon->GetClass() == CannonClass)
 		{
+			PlayerPawn->SetupCannon(CannonClass);
 			Cannon->AddAmmo(Cannon->GetCannonType(), Bullets);
 		}
 		else
