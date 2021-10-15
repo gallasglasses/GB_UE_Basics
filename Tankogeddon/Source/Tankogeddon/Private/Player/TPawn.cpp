@@ -45,6 +45,10 @@ ATPawn::ATPawn()
 
 	HitCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit collider"));
 	HitCollider->SetupAttachment(S_TBody);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
+	HealthComponent->OnHealthChanged.AddDynamic(this, &ATPawn::OnHealthChanged);
+	HealthComponent->OnDie.AddDynamic(this, &ATPawn::OnDie);
 }
 
 // Called when the game starts or when spawned
