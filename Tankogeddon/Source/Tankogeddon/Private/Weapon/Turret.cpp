@@ -145,3 +145,8 @@ void ATurret::TakeDamage(const FDamageData& DamageData)
 {
 	HealthComponent->TakeDamage(DamageData);
 }
+
+int32 ATurret::GetScoresForKilling() const
+{
+	return ScoresForKilling;
+}

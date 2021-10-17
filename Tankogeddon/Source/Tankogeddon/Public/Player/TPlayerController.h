@@ -21,6 +21,9 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	UPROPERTY()
+		int32 Scores;
+
 private:
 	UPROPERTY()
 		ATPawn* TPawn;

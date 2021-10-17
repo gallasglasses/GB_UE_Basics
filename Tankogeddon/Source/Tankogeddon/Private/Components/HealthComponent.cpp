@@ -2,6 +2,7 @@
 
 
 #include "Components/HealthComponent.h"
+#include "../../TankogeddonGameModeBase.h"
 
 // Sets default values for this component's properties
 UHealthComponent::UHealthComponent()
@@ -24,6 +25,7 @@ void UHealthComponent::TakeDamage(const FDamageData& DamageData)
 		{
 			OnDie.Broadcast();
 		}
+		Cast<ATankogeddonGameModeBase>(GetWorld()->GetAuthGameMode())->DestructionControl(GetOwner(), DamageData);
 	}
 	else
 	{

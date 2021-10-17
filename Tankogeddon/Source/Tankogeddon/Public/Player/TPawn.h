@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "Damageable.h"
+#include "Components/Scoreable.h"
 #include "TPawn.generated.h"
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
@@ -20,7 +21,7 @@ class UHealthComponent;
 class ATCannon;
 
 UCLASS()
-class TANKOGEDDON_API ATPawn : public APawn, public IDamageable
+class TANKOGEDDON_API ATPawn : public APawn, public IDamageable, public IScoreable
 {
 	GENERATED_BODY()
 
@@ -65,6 +66,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float RotationSmoothness = 0.5f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+		float ScoresForKilling = 10.0f;
+
 	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		float TurretRotationSmoothness = 0.5f;*/
 
@@ -105,6 +109,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		ATCannon* GetCannon();
+
+	int32 GetScoresForKilling() const override;
 
 private:
 	UPROPERTY()

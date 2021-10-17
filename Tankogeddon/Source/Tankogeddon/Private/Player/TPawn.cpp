@@ -169,3 +169,8 @@ void ATPawn::TakeDamage(const FDamageData& DamageData)
 {
 	HealthComponent->TakeDamage(DamageData);
 }
+
+int32 ATPawn::GetScoresForKilling() const
+{
+	return ScoresForKilling;
+}
