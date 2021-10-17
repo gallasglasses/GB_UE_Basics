@@ -9,6 +9,7 @@
 #include "DrawDebugHelpers.h"
 #include "TProjectile.h"
 #include "ActorPoolSubsystem.h"
+#include "Components/Damageable.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCannon, All, All);
 
@@ -253,6 +254,17 @@ void ATCannon::Shot()
 			if (HitResult.Actor.IsValid() && HitResult.Component.IsValid(), HitResult.Component->GetCollisionObjectType() == ECC_Destructible)
 			{
 				HitResult.Actor->Destroy();
+			}
+			else if (IDamageable* Damageable = Cast<IDamageable>(HitResult.Actor))
+			{
+				if (HitResult.Actor != GetInstigator())
+				{
+					FDamageData DamageData;
+					DamageData.DamageValue = FireDamage;
+					DamageData.Instigator = GetInstigator();
+					DamageData.DamageMaker = this;
+					Damageable->TakeDamage(DamageData);
+				}
 			}
 			GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Green, TEXT("Fire trace on object"));
 		}
