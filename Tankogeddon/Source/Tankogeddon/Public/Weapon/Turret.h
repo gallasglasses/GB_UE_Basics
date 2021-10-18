@@ -62,9 +62,10 @@ protected:
 	virtual void Destroyed() override;
 	void Targeting();
 	void RotateToPlayer();
+	void Fire();
 	bool IsPlayerInRange();
 	bool CanFire();
-	void Fire();
+	bool PlayerVisibilityControl();
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnHealthChanged(float Damage);

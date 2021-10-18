@@ -13,6 +13,7 @@
 #include "../../Tankogeddon.h"
 #include "GameStructs.h"
 #include "HealthComponent.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ATurret::ATurret()
@@ -104,6 +105,10 @@ bool ATurret::IsPlayerInRange()
 
 bool ATurret::CanFire()
 {
+	if (!PlayerVisibilityControl())
+	{
+		return false;
+	}
 	FVector TargetingDir = TurretMesh->GetForwardVector();
 	FVector DirToPlayer = PlayerPawn->GetActorLocation() - GetActorLocation();
 	DirToPlayer.Normalize();
@@ -149,4 +154,24 @@ void ATurret::TakeDamage(const FDamageData& DamageData)
 int32 ATurret::GetScoresForKilling() const
 {
 	return ScoresForKilling;
+}
+
+bool ATurret::PlayerVisibilityControl()
+{
+	FHitResult HitResult;
+	FVector TraceStart = CannonSetupPoint->GetComponentLocation();
+	FVector TraceEnd = PlayerPawn->GetActorLocation();
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Turret Vission Trace")), true, this);
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+	{
+		if (HitResult.Actor.Get())
+		{
+			DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Purple, false, 0.1f, 0, 5);
+			return HitResult.Actor.Get() == PlayerPawn;
+		}
+	}
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Purple, false, 0.1f, 0, 5);
+	return false;
 }
