@@ -10,6 +10,10 @@
 class UStaticMeshComponent;
 class UArrowComponent;
 class ATProjectile;
+class UForceFeedbackEffect;
+class UCameraShakeBase;
+class UParticleSystemComponent;
+class UAudioComponent;
 
 USTRUCT(BlueprintType)
 struct FAmmoData
@@ -38,20 +42,32 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UArrowComponent* ProjectileSpawnPoint;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+		UForceFeedbackEffect* ShootForceEffect;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		ECannonType Type = ECannonType::FireProjectile;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		TSubclassOf<ATProjectile> ProjectileClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Effects")
+		TSubclassOf<UCameraShakeBase> ShootShake;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		FAmmoData DefaultProjectileAmmoData{5, 1, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
-		FAmmoData DefaultTraceAmmoData {1, 0, false};
+		FAmmoData DefaultTraceAmmoData {1, 10, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		FAmmoData DefaultRifleAmmoData {10, 10, true};
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent* ShootEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UAudioComponent* AudioEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireRate = 1.0f;

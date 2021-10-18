@@ -69,8 +69,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		float ScoresForKilling = 10.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params")
+		float MovementAccuracy = 50.0f;
+
 	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		float TurretRotationSmoothness = 0.5f;*/
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params", Meta = (MakeEditWidget = true))
+		TArray<FVector> PatrollingPoints;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		TSubclassOf<ATCannon> DefaultCannonClass;
@@ -109,6 +115,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		ATCannon* GetCannon();
+
+	UFUNCTION(BlueprintPure, Category = "Turret")
+		FVector GetTurretForwardVector();
+
+	UFUNCTION(BlueprintPure, Category = "AI|Move params")
+		const TArray<FVector>& GetPatrollingPoints();
+
+	UFUNCTION(BlueprintPure, Category = "AI|Move params")
+		float GetMovementAccuracy();
 
 	int32 GetScoresForKilling() const override;
 
