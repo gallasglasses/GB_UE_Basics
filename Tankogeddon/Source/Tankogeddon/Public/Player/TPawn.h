@@ -19,6 +19,8 @@ class UArrowComponent;
 class UBoxComponent;
 class UHealthComponent;
 class ATCannon;
+class UParticleSystemComponent;
+class UAudioComponent;
 
 UCLASS()
 class TANKOGEDDON_API ATPawn : public APawn, public IDamageable, public IScoreable
@@ -54,6 +56,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent* DeathEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UAudioComponent* DeathAudioEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent* HitEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UAudioComponent* HitAudioEffect;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float MoveSpeed = 1000.0f;
 
@@ -86,6 +100,11 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnDie();
+
+	UFUNCTION()
+		void Death();
+
+	FTimerHandle DeathTimerHandle;
 
 public:	
 	// Called every frame

@@ -14,6 +14,8 @@
 #include "GameStructs.h"
 #include "HealthComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ATurret::ATurret()
@@ -48,7 +50,23 @@ ATurret::ATurret()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ATurret::OnHealthChanged);
-	HealthComponent->OnDie.AddDynamic(this, &ATurret::OnDie);
+	HealthComponent->OnDie.AddDynamic(this, &ATurret::Death);
+
+	DeathEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Death Effect"));
+	DeathEffect->SetupAttachment(RootComponent);
+	DeathEffect->bAutoActivate = false;
+
+	DeathAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Death Audio Effect"));
+	DeathAudioEffect->SetupAttachment(RootComponent);
+	DeathAudioEffect->bAutoActivate = false;
+
+	HitEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+	HitEffect->SetupAttachment(RootComponent);
+	HitEffect->bAutoActivate = false;
+
+	HitAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Hit Audio Effect"));
+	HitAudioEffect->SetupAttachment(RootComponent);
+	HitAudioEffect->bAutoActivate = false;
 }
 
 // Called when the game starts or when spawned
@@ -129,6 +147,13 @@ void ATurret::OnHealthChanged_Implementation(float Damage)
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Turret %s taked damage:%f "), *GetName(), Damage));
 }
 
+void ATurret::Death()
+{
+	DeathEffect->ActivateSystem();
+	DeathAudioEffect->Play();
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATurret::OnDie, 0.5f, false, 0.0f);
+}
+
 void ATurret::OnDie_Implementation()
 {
 	Destroy();
@@ -148,6 +173,8 @@ void ATurret::Tick(float DeltaTime)
 
 void ATurret::TakeDamage(const FDamageData& DamageData)
 {
+	HitEffect->ActivateSystem();
+	HitAudioEffect->Play();
 	HealthComponent->TakeDamage(DamageData);
 }
 

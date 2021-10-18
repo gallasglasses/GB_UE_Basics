@@ -12,6 +12,8 @@
 #include "GameStructs.h"
 #include "HealthComponent.h"
 #include "Components/BoxComponent.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
 
 //DEFINE_LOG_CATEGORY(LogPawn);
 
@@ -48,7 +50,23 @@ ATPawn::ATPawn()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ATPawn::OnHealthChanged);
-	HealthComponent->OnDie.AddDynamic(this, &ATPawn::OnDie);
+	HealthComponent->OnDie.AddDynamic(this, &ATPawn::Death);
+
+	DeathEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Death Effect"));
+	DeathEffect->SetupAttachment(RootComponent);
+	DeathEffect->bAutoActivate = false;
+
+	DeathAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Death Audio Effect"));
+	DeathAudioEffect->SetupAttachment(RootComponent);
+	DeathAudioEffect->bAutoActivate = false;
+
+	HitEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
+	HitEffect->SetupAttachment(RootComponent);
+	HitEffect->bAutoActivate = false;
+
+	HitAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Hit Audio Effect"));
+	HitAudioEffect->SetupAttachment(RootComponent);
+	HitAudioEffect->bAutoActivate = false;
 }
 
 // Called when the game starts or when spawned
@@ -175,8 +193,17 @@ void ATPawn::OnDie_Implementation()
 	Destroy();
 }
 
+void ATPawn::Death()
+{
+	DeathEffect->ActivateSystem();
+	DeathAudioEffect->Play();
+	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATPawn::OnDie, 0.5f, false, 0.0f);
+}
+
 void ATPawn::TakeDamage(const FDamageData& DamageData)
 {
+	HitEffect->ActivateSystem();
+	HitAudioEffect->Play();
 	HealthComponent->TakeDamage(DamageData);
 }
 

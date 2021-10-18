@@ -225,24 +225,6 @@ void ATCannon::RifleShot()
 
 void ATCannon::Shot()
 {
-	ShootEffect->ActivateSystem();
-	AudioEffect->Play();
-
-	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
-	{
-		if (ShootForceEffect)
-		{
-			FForceFeedbackParameters Params;
-			Params.bLooping = false;
-			Params.Tag = TEXT("ShootFFParams");
-			GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(ShootForceEffect);
-		}
-
-		if (ShootShake)
-		{
-			GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
-		}
-	}
 	if (Type == ECannonType::FireProjectile)
 	{
 		if (IsAmmoEmpty(CurrentProjectileAmmo))
@@ -250,6 +232,24 @@ void ATCannon::Shot()
 			Reload();
 			
 			return;
+		}
+		ShootEffect->ActivateSystem();
+		AudioEffect->Play();
+
+		if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+		{
+			if (ShootForceEffect)
+			{
+				FForceFeedbackParameters Params;
+				Params.bLooping = false;
+				Params.Tag = TEXT("ShootFFParams");
+				GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(ShootForceEffect);
+			}
+
+			if (ShootShake)
+			{
+				GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
+			}
 		}
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));
 

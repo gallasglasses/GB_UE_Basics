@@ -13,6 +13,8 @@ class UBoxComponent;
 class UHealthComponent;
 class ATCannon;
 class APawn;
+class UParticleSystemComponent;
+class UAudioComponent;
 
 UCLASS()
 class TANKOGEDDON_API ATurret : public AActor, public IDamageable, public IScoreable
@@ -39,6 +41,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent* DeathEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UAudioComponent* DeathAudioEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UParticleSystemComponent* HitEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UAudioComponent* HitAudioEffect;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 		TSubclassOf<ATCannon> CannonClass;
 
@@ -63,6 +77,8 @@ protected:
 	void Targeting();
 	void RotateToPlayer();
 	void Fire();
+	UFUNCTION()
+	void Death();
 	bool IsPlayerInRange();
 	bool CanFire();
 	bool PlayerVisibilityControl();
@@ -72,6 +88,8 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnDie();
+
+	FTimerHandle DeathTimerHandle;
 
 private:
 	UPROPERTY()
