@@ -31,6 +31,10 @@ private:
 	UFUNCTION(exec)
 		void DumpActorPoolSubsystemStats();
 
+	FVector2D LastFrameMousePosition;
+
+	bool bIsControllingFromMouse = false;
+
 	void MoveForward(float Amount);
 	void RotateRight(float Amount);
 	void Fire();

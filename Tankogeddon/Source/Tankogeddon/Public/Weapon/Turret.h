@@ -13,8 +13,9 @@ class UBoxComponent;
 class UHealthComponent;
 class ATCannon;
 class APawn;
-class UParticleSystemComponent;
-class UAudioComponent;
+class UParticleSystem;
+class USoundBase;
+class ATAmmoPickup;
 
 UCLASS()
 class TANKOGEDDON_API ATurret : public AActor, public IDamageable, public IScoreable
@@ -41,20 +42,23 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UParticleSystemComponent* DeathEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		UParticleSystem* DestructionEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UAudioComponent* DeathAudioEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* DestructionAudioEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UParticleSystemComponent* HitEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		UParticleSystem* DeathEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UAudioComponent* HitAudioEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* DeathAudioEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 		TSubclassOf<ATCannon> CannonClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bonuses")
+		TSubclassOf<ATAmmoPickup> LootBox;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float TargetingRange = 1000.f;
@@ -77,8 +81,6 @@ protected:
 	void Targeting();
 	void RotateToPlayer();
 	void Fire();
-	UFUNCTION()
-	void Death();
 	bool IsPlayerInRange();
 	bool CanFire();
 	bool PlayerVisibilityControl();
@@ -88,8 +90,6 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnDie();
-
-	FTimerHandle DeathTimerHandle;
 
 private:
 	UPROPERTY()

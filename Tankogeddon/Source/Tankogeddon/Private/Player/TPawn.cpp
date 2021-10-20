@@ -12,8 +12,8 @@
 #include "GameStructs.h"
 #include "HealthComponent.h"
 #include "Components/BoxComponent.h"
-#include "Particles/ParticleSystemComponent.h"
-#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Pickups/TAmmoPickup.h"
 
 //DEFINE_LOG_CATEGORY(LogPawn);
 
@@ -50,23 +50,7 @@ ATPawn::ATPawn()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
 	HealthComponent->OnHealthChanged.AddDynamic(this, &ATPawn::OnHealthChanged);
-	HealthComponent->OnDie.AddDynamic(this, &ATPawn::Death);
-
-	DeathEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Death Effect"));
-	DeathEffect->SetupAttachment(RootComponent);
-	DeathEffect->bAutoActivate = false;
-
-	DeathAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Death Audio Effect"));
-	DeathAudioEffect->SetupAttachment(RootComponent);
-	DeathAudioEffect->bAutoActivate = false;
-
-	HitEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Hit Effect"));
-	HitEffect->SetupAttachment(RootComponent);
-	HitEffect->bAutoActivate = false;
-
-	HitAudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Hit Audio Effect"));
-	HitAudioEffect->SetupAttachment(RootComponent);
-	HitAudioEffect->bAutoActivate = false;
+	HealthComponent->OnDie.AddDynamic(this, &ATPawn::OnDie);
 }
 
 // Called when the game starts or when spawned
@@ -94,6 +78,12 @@ void ATPawn::Tick(float DeltaTime)
    
     //UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
+	if (!bIsTurretTargetSet)
+	{
+		TurretTargetDirection = TurretTargetDirection.RotateAngleAxis(RotationSmoothness * TurretRotationAxis, FVector::UpVector);
+		TurretTargetPosition = GetActorLocation() + TurretTargetDirection;
+	}
+
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(S_TTurret->GetComponentLocation(), TurretTargetPosition);
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
@@ -115,7 +105,15 @@ void ATPawn::RotateRight(float Amount)
 
 void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 {
-    TurretTargetPosition = TargetPosition;
+	TurretTargetPosition = TargetPosition; 
+	bIsTurretTargetSet = true;
+}
+
+void ATPawn::SetTurretRotationAxis(float AxisValue)
+{
+	TurretRotationAxis = AxisValue;
+	TurretTargetDirection = TurretTargetPosition - GetActorLocation();
+	bIsTurretTargetSet = false;
 }
 
 void ATPawn::Fire()
@@ -190,20 +188,23 @@ void ATPawn::OnHealthChanged_Implementation(float Damage)
 
 void ATPawn::OnDie_Implementation()
 {
-	Destroy();
-}
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathAudioEffect, GetActorLocation());
 
-void ATPawn::Death()
-{
-	DeathEffect->ActivateSystem();
-	DeathAudioEffect->Play();
-	GetWorld()->GetTimerManager().SetTimer(DeathTimerHandle, this, &ATPawn::OnDie, 0.5f, false, 0.0f);
+	if (LootBox)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+		GetWorld()->SpawnActor<ATAmmoPickup>(LootBox, GetActorTransform(), SpawnParams);
+	}
+
+	Destroy();
 }
 
 void ATPawn::TakeDamage(const FDamageData& DamageData)
 {
-	HitEffect->ActivateSystem();
-	HitAudioEffect->Play();
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitAudioEffect, GetActorLocation());
 	HealthComponent->TakeDamage(DamageData);
 }
 

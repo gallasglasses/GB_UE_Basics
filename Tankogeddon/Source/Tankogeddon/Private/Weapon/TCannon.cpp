@@ -248,7 +248,7 @@ void ATCannon::Shot()
 
 			if (ShootShake)
 			{
-				GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
+				GetWorld()->GetFirstPlayerController()->ClientStartCameraShake(ShootShake);
 			}
 		}
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));

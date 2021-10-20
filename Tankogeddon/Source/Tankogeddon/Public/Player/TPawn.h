@@ -19,8 +19,9 @@ class UArrowComponent;
 class UBoxComponent;
 class UHealthComponent;
 class ATCannon;
-class UParticleSystemComponent;
-class UAudioComponent;
+class UParticleSystem;
+class USoundBase;
+class ATAmmoPickup;
 
 UCLASS()
 class TANKOGEDDON_API ATPawn : public APawn, public IDamageable, public IScoreable
@@ -56,17 +57,17 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UParticleSystemComponent* DeathEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		UParticleSystem* DeathEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UAudioComponent* DeathAudioEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* DeathAudioEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UParticleSystemComponent* HitEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		UParticleSystem* HitEffect;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UAudioComponent* HitAudioEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+		USoundBase* HitAudioEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float MoveSpeed = 1000.0f;
@@ -95,16 +96,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		TSubclassOf<ATCannon> DefaultCannonClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bonuses")
+		TSubclassOf<ATAmmoPickup> LootBox;
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnHealthChanged(float Damage);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Health")
 		void OnDie();
-
-	UFUNCTION()
-		void Death();
-
-	FTimerHandle DeathTimerHandle;
 
 public:	
 	// Called every frame
@@ -119,6 +118,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void SetTurretTargetPosition(const FVector& TargetPosition);
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void SetTurretRotationAxis(float AxisValue);
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void Fire();
@@ -154,7 +156,11 @@ private:
 		ATCannon* TInactiveCannon = nullptr;
 
 	FVector TurretTargetPosition;
+	FVector TurretTargetDirection;
 
+	bool bIsTurretTargetSet = false;
+
+	float TurretRotationAxis = 0.0f;
 	float TAxisMoveForward = 0.0f;
 	float TAxisRotateRight = 0.0f;
 	float TCurrentAxisMoveForward = 0.0f;
