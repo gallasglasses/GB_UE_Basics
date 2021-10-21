@@ -11,6 +11,8 @@ class UStaticMeshComponent;
 class UArrowComponent;
 class UBoxComponent;
 class UHealthComponent;
+class UParticleSystem;
+class USoundBase;
 class ATPawn;
 class ATargetPoint;
 class AMapLoader;
@@ -36,6 +38,15 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* SpawnTankAudioEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		UParticleSystem* DeathFactoryEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* DeathFactoryAudioEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Params")
 		AMapLoader* MapLoader;

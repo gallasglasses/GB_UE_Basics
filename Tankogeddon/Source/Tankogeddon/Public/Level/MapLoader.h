@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UBoxComponent;
 class UPointLightComponent;
 class UPointLightComponent;
+class USoundBase;
 
 UCLASS()
 class TANKOGEDDON_API AMapLoader : public AActor
@@ -36,6 +37,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UPointLightComponent* DeactivatedLight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* ActivatedAudioEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level loading params")
 		FName LoadLevelName;

@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "Player/TPawn.h"
 #include "../../Tankogeddon.h"
+#include "Particles/ParticleSystem.h"
 #include "Kismet/GameplayStatics.h"
 #include "Level/MapLoader.h"
 
@@ -40,6 +41,9 @@ void ATFactory::Die()
 		MapLoader->SetIsActivated(true);
 	}
 
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathFactoryEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(4.0, 4.0, 4.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathFactoryAudioEffect, GetActorLocation());
+
 	Destroy();
 }
 
@@ -70,6 +74,7 @@ void ATFactory::SpawnNewTank()
 	NewTank->SetPatrollingPoints(TankWayPoints);
 	
 	NewTank->FinishSpawning(SpawnTransform);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SpawnTankAudioEffect, GetActorLocation());
 }
 
 void ATFactory::TakeDamage(const FDamageData& DamageData)

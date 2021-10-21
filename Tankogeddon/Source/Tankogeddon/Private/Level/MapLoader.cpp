@@ -6,6 +6,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AMapLoader::AMapLoader()
@@ -35,6 +36,7 @@ void AMapLoader::SetIsActivated(bool NewIsActivated)
 {
 	bIsActivated = NewIsActivated;
 	SetActiveLights();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ActivatedAudioEffect, GetActorLocation());
 }
 
 // Called when the game starts or when spawned
@@ -61,6 +63,7 @@ void AMapLoader::OnTriggerOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	if (OtherActor == PlayerPawn)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ActivatedAudioEffect, GetActorLocation());
 		UGameplayStatics::OpenLevel(GetWorld(), LoadLevelName);
 	}
 }
