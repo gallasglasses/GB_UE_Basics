@@ -19,9 +19,6 @@ protected:
 	UPROPERTY()
 		ATPawn* TankPawn;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params", Meta = (MakeEditWidget = true))
-		TArray<FVector> PatrollingPoints;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Targeting")
 		float TargetingRange = 1000.f;
 

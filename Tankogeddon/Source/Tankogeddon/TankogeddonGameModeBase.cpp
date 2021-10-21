@@ -2,8 +2,7 @@
 #include "TankogeddonGameModeBase.h"
 #include "Player/TPlayerController.h"
 #include "Components/Scoreable.h"
-
-DEFINE_LOG_CATEGORY(LogTankogeddon);
+#include "../../Tankogeddon.h"
 
 void ATankogeddonGameModeBase::DestructionControl(AActor* Actor, const FDamageData& DamageData)
 {

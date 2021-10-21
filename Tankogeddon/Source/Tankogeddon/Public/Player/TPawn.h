@@ -22,6 +22,7 @@ class ATCannon;
 class UParticleSystem;
 class USoundBase;
 class ATAmmoPickup;
+class ATargetPoint;
 
 UCLASS()
 class TANKOGEDDON_API ATPawn : public APawn, public IDamageable, public IScoreable
@@ -91,7 +92,7 @@ protected:
 		float TurretRotationSmoothness = 0.5f;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Move params", Meta = (MakeEditWidget = true))
-		TArray<FVector> PatrollingPoints;
+		TArray<ATargetPoint*> PatrollingPoints;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		TSubclassOf<ATCannon> DefaultCannonClass;
@@ -134,6 +135,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void NextWeapon();
 
+	UFUNCTION(BlueprintCallable, Category = "AI|Move params")
+		void SetPatrollingPoints(const TArray<ATargetPoint*>& InPoints);
+
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		ATCannon* GetCannon();
 
@@ -141,7 +145,7 @@ public:
 		FVector GetTurretForwardVector();
 
 	UFUNCTION(BlueprintPure, Category = "AI|Move params")
-		const TArray<FVector>& GetPatrollingPoints();
+		const TArray<ATargetPoint*>& GetPatrollingPoints() const;
 
 	UFUNCTION(BlueprintPure, Category = "AI|Move params")
 		float GetMovementAccuracy();
