@@ -7,7 +7,7 @@
 #include "MapLoader.generated.h"
 
 class UStaticMeshComponent;
-class UBoxComponent;
+class USphereComponent;
 class UPointLightComponent;
 class UPointLightComponent;
 class USoundBase;
@@ -30,7 +30,7 @@ protected:
 		UStaticMeshComponent* GatesMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
-		UBoxComponent* TriggerCollider;
+		USphereComponent* TriggerCollider;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UPointLightComponent* ActivatedLight;

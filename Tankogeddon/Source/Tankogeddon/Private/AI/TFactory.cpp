@@ -23,6 +23,12 @@ ATFactory::ATFactory()
 	BuildingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Building Mesh"));
 	BuildingMesh->SetupAttachment(SceneComp);
 
+	BuildingWallMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Building Wall Mesh"));
+	BuildingWallMesh->SetupAttachment(BuildingMesh);
+
+	DestroyedMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Destroyed Mesh"));
+	DestroyedMesh->SetupAttachment(SceneComp);
+
 	TankSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Cannon setup point"));
 	TankSpawnPoint->SetupAttachment(SceneComp);
 
@@ -40,11 +46,14 @@ void ATFactory::Die()
 	{
 		MapLoader->SetIsActivated(true);
 	}
-
+	bIsFactoryDestroyed = true;
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathFactoryEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(4.0, 4.0, 4.0), true);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathFactoryAudioEffect, GetActorLocation());
+	BuildingMesh->SetHiddenInGame(true);
+	BuildingWallMesh->SetHiddenInGame(true);
+	DestroyedMesh->SetHiddenInGame(false);
 
-	Destroy();
+	//Destroy();
 }
 
 void ATFactory::DamageTaked(float DamageValue)
@@ -55,6 +64,9 @@ void ATFactory::DamageTaked(float DamageValue)
 void ATFactory::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//BuildingMesh->SetHiddenInGame(false);
+	DestroyedMesh->SetHiddenInGame(true);
 	
 	GetWorld()->GetTimerManager().SetTimer(SpawnTankTimerHandle, this, &ATFactory::SpawnNewTank, SpawnTankRate, true, SpawnTankRate);
 }
@@ -68,18 +80,24 @@ void ATFactory::EndPlay(EEndPlayReason::Type EndPlayReason)
 
 void ATFactory::SpawnNewTank()
 {
-	FTransform SpawnTransform(TankSpawnPoint->GetComponentRotation(), TankSpawnPoint->GetComponentLocation(), FVector(1.f));
-	ATPawn* NewTank = GetWorld()->SpawnActorDeferred<ATPawn>(SpawnTankClass, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-	
-	NewTank->SetPatrollingPoints(TankWayPoints);
-	
-	NewTank->FinishSpawning(SpawnTransform);
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SpawnTankAudioEffect, GetActorLocation());
+	if (!bIsFactoryDestroyed)
+	{
+		FTransform SpawnTransform(TankSpawnPoint->GetComponentRotation(), TankSpawnPoint->GetComponentLocation(), FVector(1.f));
+		ATPawn* NewTank = GetWorld()->SpawnActorDeferred<ATPawn>(SpawnTankClass, SpawnTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+		NewTank->SetPatrollingPoints(TankWayPoints);
+
+		NewTank->FinishSpawning(SpawnTransform);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SpawnTankAudioEffect, GetActorLocation());
+	}
 }
 
 void ATFactory::TakeDamage(const FDamageData& DamageData)
 {
-	HealthComponent->TakeDamage(DamageData);
+	if (!bIsFactoryDestroyed)
+	{
+		HealthComponent->TakeDamage(DamageData);
+	}
 }
 
 

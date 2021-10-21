@@ -4,7 +4,7 @@
 #include "Level/MapLoader.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 
@@ -26,7 +26,7 @@ AMapLoader::AMapLoader()
 	DeactivatedLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("Deactivated lights"));
 	DeactivatedLight->SetupAttachment(SceneComp);
 
-	TriggerCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger collider"));
+	TriggerCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger collider"));
 	TriggerCollider->SetupAttachment(SceneComp);
 
 	TriggerCollider->OnComponentBeginOverlap.AddDynamic(this, &AMapLoader::OnTriggerOverlapBegin);
