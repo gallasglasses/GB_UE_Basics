@@ -8,6 +8,7 @@
 #include "Components/Damageable.h"
 #include "ActorPoolSubsystem.h"
 #include "Damageable.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ATProjectile::ATProjectile()
@@ -162,6 +163,7 @@ void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* POtherComp, const
 {
 	if (POtherComp->IsSimulatingPhysics())
 	{
+		SpawnEffects();
 		FVector Impulse = Mass * MoveSpeed * GetActorForwardVector();
 		POtherComp->AddImpulseAtLocation(Impulse, PHitResult.ImpactPoint);
 	}
@@ -171,6 +173,7 @@ void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor*
 {
 	if (PHitMesh->IsSimulatingPhysics())
 	{
+		SpawnEffects();
 		FVector ForceVector = PHitActor->GetActorLocation() - GetActorLocation();
 		ForceVector.Normalize();
 		//HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
@@ -179,3 +182,8 @@ void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor*
 	}
 }
 
+void ATProjectile::SpawnEffects()
+{
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitAudioEffect, GetActorLocation());
+}

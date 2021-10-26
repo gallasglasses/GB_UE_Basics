@@ -7,6 +7,8 @@
 #include "TProjectile.generated.h"
 
 class UStaticMeshComponent;
+class UParticleSystem;
+class USoundBase;
 
 UCLASS()
 class TANKOGEDDON_API ATProjectile : public AActor
@@ -46,6 +48,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion Parametrs")
 		bool bImpactExplosion = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
+		UParticleSystem* HitEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
+		USoundBase* HitAudioEffect;
+
 protected:
 	UFUNCTION()
 		virtual void OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& SweepResult);
@@ -56,4 +64,5 @@ private:
 	void CheckDamageTaken(AActor* DamageTakenActor);
 	void CheckSimulatingPhysics(UPrimitiveComponent* POtherComp, const FHitResult& PHitResult);
 	void CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor* PHitActor);
+	void SpawnEffects();
 };
