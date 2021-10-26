@@ -9,8 +9,6 @@
 #include "Components/Scoreable.h"
 #include "TPawn.generated.h"
 
-//DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
-
 class UStaticMeshComponent;
 class UStaticMeshComponent;
 class UCameraComponent;

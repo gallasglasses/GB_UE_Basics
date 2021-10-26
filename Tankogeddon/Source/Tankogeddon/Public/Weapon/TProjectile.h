@@ -16,8 +16,8 @@ class TANKOGEDDON_API ATProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	ATProjectile();
-	void Start();
-	void Stop();
+	virtual void Start();
+	virtual void Stop();
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
@@ -33,9 +33,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
 		float DamageAmount = 1.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
+		float Mass = 1.0f;
+
 protected:
 	UFUNCTION()
-		void OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& SweepResult);
+		virtual void OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& SweepResult);
 
 private:
 	FVector StartPosition;
