@@ -18,6 +18,7 @@ public:
 	ATProjectile();
 	virtual void Start();
 	virtual void Stop();
+	virtual void Explode();
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
@@ -35,6 +36,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
 		float Mass = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion Parametrs", meta = (EditCondition = "bImpactExplosion", EditConditionHides))
+		float ExplosionRange = 1000.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion Parametrs", meta = (EditCondition = "bImpactExplosion", EditConditionHides))
+		float ExplosionImpulse = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Explosion Parametrs")
+		bool bImpactExplosion = true;
 
 protected:
 	UFUNCTION()
