@@ -87,30 +87,15 @@ void ATProjectile::Explode()
 		{
 			AActor* HitActor = HitResult.GetActor();
 			if (!HitActor)
-				continue;
-
-			IDamageable* DamageableActor = Cast<IDamageable>(HitActor);
-			if (DamageableActor)
 			{
-				FDamageData DamageData;
-				DamageData.DamageValue = DamageAmount;
-				DamageData.Instigator = GetOwner();
-				DamageData.DamageMaker = this;
-
-				DamageableActor->TakeDamage(DamageData);
+				continue;
 			}
 
+			CheckDamageTaken(HitResult.GetActor());
 			UPrimitiveComponent* HitMesh = Cast<UPrimitiveComponent>(HitActor->GetRootComponent());
 			if (HitMesh)
 			{
-				if (HitMesh->IsSimulatingPhysics())
-				{
-					FVector ForceVector = HitActor->GetActorLocation() - GetActorLocation();
-					ForceVector.Normalize();
-					//HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
-					HitMesh->AddForce(ForceVector * ExplosionImpulse, NAME_None, true);
-					//HitMesh->AddForceAtLocation(ForceVector * ExplosionImpulse, SweepResult.ImpactPoint, NAME_None);
-				}
+				CheckSimulatingPhysics(HitMesh, HitActor);
 			}
 		}
 	}
@@ -142,23 +127,15 @@ void ATProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* Othe
 			return;
 		}
 
-		if (OtherComp->IsSimulatingPhysics())
-		{
-			FVector Impulse = Mass * MoveSpeed * GetActorForwardVector();
-			OtherComp->AddImpulseAtLocation(Impulse, SweepResult.ImpactPoint);
-		}
+		CheckSimulatingPhysics(OtherComp, SweepResult);
 
 		if (OtherActor && OtherComp && OtherComp->GetCollisionObjectType() == ECC_Destructible)
 		{
 			OtherActor->Destroy();
 		}
-		else if (IDamageable* Damageable = Cast<IDamageable>(OtherActor))
+		else
 		{
-			FDamageData DamageData;
-			DamageData.DamageValue = DamageAmount;
-			DamageData.Instigator = GetInstigator();
-			DamageData.DamageMaker = this;
-			Damageable->TakeDamage(DamageData);
+			CheckDamageTaken(OtherActor);
 		}
 	}
 	else 
@@ -167,5 +144,38 @@ void ATProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* Othe
 
 	}
 	Stop();
+}
+
+void ATProjectile::CheckDamageTaken(AActor* DamageTakenActor)
+{
+	if (IDamageable* Damageable = Cast<IDamageable>(DamageTakenActor))
+	{
+		FDamageData DamageData;
+		DamageData.DamageValue = DamageAmount;
+		DamageData.Instigator = GetInstigator();
+		DamageData.DamageMaker = this;
+		Damageable->TakeDamage(DamageData);
+	}
+}
+
+void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* POtherComp, const FHitResult& PHitResult)
+{
+	if (POtherComp->IsSimulatingPhysics())
+	{
+		FVector Impulse = Mass * MoveSpeed * GetActorForwardVector();
+		POtherComp->AddImpulseAtLocation(Impulse, PHitResult.ImpactPoint);
+	}
+}
+
+void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor* PHitActor)
+{
+	if (PHitMesh->IsSimulatingPhysics())
+	{
+		FVector ForceVector = PHitActor->GetActorLocation() - GetActorLocation();
+		ForceVector.Normalize();
+		//HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
+		PHitMesh->AddForce(ForceVector * ExplosionImpulse, NAME_None, true);
+		//HitMesh->AddForceAtLocation(ForceVector * ExplosionImpulse, SweepResult.ImpactPoint, NAME_None);
+	}
 }
 

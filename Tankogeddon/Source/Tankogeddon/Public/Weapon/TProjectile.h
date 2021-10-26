@@ -53,4 +53,7 @@ protected:
 private:
 	FVector StartPosition;
 
+	void CheckDamageTaken(AActor* DamageTakenActor);
+	void CheckSimulatingPhysics(UPrimitiveComponent* POtherComp, const FHitResult& PHitResult);
+	void CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor* PHitActor);
 };
