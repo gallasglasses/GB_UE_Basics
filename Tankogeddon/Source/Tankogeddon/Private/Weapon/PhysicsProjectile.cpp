@@ -36,7 +36,6 @@ void APhysicsProjectile::Tick(float DeltaSeconds)
 
 void APhysicsProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& SweepResult)
 {
-	Super::OnProjectileHit(HittedComp, OtherActor, OtherComp, NormalImpulse, SweepResult);
 	FVector StartPos = GetActorLocation();
 	FVector EndPos = StartPos + FVector(0.1f);
 
@@ -88,7 +87,9 @@ void APhysicsProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor
 				{
 					FVector ForceVector = HitActor->GetActorLocation() - GetActorLocation();
 					ForceVector.Normalize();
-					HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
+					//HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
+					HitMesh->AddForce(ForceVector * ExplosionImpulse, NAME_None, true);
+					//HitMesh->AddForceAtLocation(ForceVector * ExplosionImpulse, SweepResult.ImpactPoint, NAME_None);
 				}
 			}
 		}
