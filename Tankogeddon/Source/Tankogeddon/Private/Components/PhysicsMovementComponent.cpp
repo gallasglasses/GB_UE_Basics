@@ -2,6 +2,8 @@
 
 
 #include "Components/PhysicsMovementComponent.h"
+#include "Math/UnrealMathUtility.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
 UPhysicsMovementComponent::UPhysicsMovementComponent()
@@ -29,15 +31,17 @@ void UPhysicsMovementComponent::BeginPlay()
 void UPhysicsMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
+
 	AActor* Owner = GetOwner();
 	if (!Owner)
 	{
 		return;
 	}
 
-	FVector NewActorLocation = Owner->GetActorLocation() + Velocity * DeltaTime + Gravity * FMath::Square(DeltaTime) / 2.f;
-	Velocity += Gravity * DeltaTime;
+	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	FVector NewActorLocation = Owner->GetActorLocation() + Velocity * DeltaTime - Gravity * FMath::Square(DeltaTime) / 2.f;
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("TargetRotation.Pitch %f"), Owner->GetActorRotation().Pitch));
+	Velocity += (-Gravity) * DeltaTime;
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("Velocity %f"), Velocity.Z));
 	Owner->SetActorLocation(NewActorLocation, true);
 }
-
