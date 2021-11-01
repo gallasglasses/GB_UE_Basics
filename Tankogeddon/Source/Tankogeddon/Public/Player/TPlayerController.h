@@ -25,8 +25,12 @@ private:
 	UPROPERTY()
 		ATPawn* TPawn;
 
+	UFUNCTION(exec)
+		void DumpActorPoolSubsystemStats();
+
 	void MoveForward(float Amount);
 	void RotateRight(float Amount);
 	void Fire();
 	void StartRifleFire();
+	void NextWeapon();
 };

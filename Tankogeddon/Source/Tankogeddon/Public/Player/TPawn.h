@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "TPawn.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
+//DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
 
 class UStaticMeshComponent;
 class UStaticMeshComponent;
@@ -81,11 +81,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		void StartRifleFire();
 
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void SetupCannon(TSubclassOf<ATCannon> InCannonClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		void NextWeapon();
+
+	UFUNCTION(BlueprintCallable, Category = "Turret")
+		ATCannon* GetCannon();
+
 private:
 	UPROPERTY()
-		ATCannon* TCannon = nullptr;
+		ATCannon* TActiveCannon = nullptr;
 
-	void SetupCannon();
+	UPROPERTY()
+		ATCannon* TInactiveCannon = nullptr;
 
 	FVector TurretTargetPosition;
 

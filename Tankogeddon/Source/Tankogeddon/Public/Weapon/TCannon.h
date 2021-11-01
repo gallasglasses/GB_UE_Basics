@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class UArrowComponent;
+class ATProjectile;
 
 USTRUCT(BlueprintType)
 struct FAmmoData
@@ -40,46 +41,69 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		ECannonType Type = ECannonType::FireProjectile;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
-		FAmmoData DefaultAmmoData{10, 10, false};
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
+		TSubclassOf<ATProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
+		FAmmoData DefaultProjectileAmmoData{5, 1, false};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
+		FAmmoData DefaultTraceAmmoData {1, 0, false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+		FAmmoData DefaultRifleAmmoData {10, 10, true};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireProjectile", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireRate = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
 		float FireRifleRate = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
-		float FireRange = 1000.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
+		float FireRange = 3000.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (EditCondition = "Type == ECannonType::FireTrace", EditConditionHides), Category = "Turret Fire Parametrs")
 		float FireDamage = 1.0f;
 
 private:
 	FTimerHandle ReloadTimerHandle;
 	bool bReadyToFire = false;
-	FAmmoData CurrentAmmo;
+	bool bRifleFire = false;
+	bool bProjectileFire = false;
+	bool bTraceFire = false;
 
 public:
 	ATCannon();
 
+	UFUNCTION()
+	ECannonType GetCannonType() const;
+
 	void Fire();
 	void StartRifleFire();
-	bool IsReadyToFire();
 	void GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+	void SetCannonType(ECannonType Type);
+	void AddAmmo(ECannonType AmmoType, int32 AmmoAmount);
+	void SetVisibility(bool bIsVisible);
+
+	bool IsReadyToFire();
+
+	FAmmoData CurrentRifleAmmo = DefaultRifleAmmoData;
+	FAmmoData CurrentProjectileAmmo = DefaultProjectileAmmoData;
+	FAmmoData CurrentTraceAmmo = DefaultTraceAmmoData;
+
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 
 	void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
-	void MakeShot();
+	void RifleShot();
+	void Shot();
 	void Reload();
-	void DecreaseAmmo();
-	void ChangeClip();
-	void LogAmmo();
-
-	bool IsAmmoEmpty() const;
-	bool IsClipEmpty() const;
+	void DecreaseAmmo(FAmmoData& CurrentDefaultAmmo);
+	void ChangeClip(FAmmoData& CurrentDefaultAmmo);
+	void LogAmmo(FAmmoData& CurrentDefaultAmmo);
+	bool IsAmmoEmpty(FAmmoData CurrentDefaultAmmo) const;
+	bool IsClipEmpty(FAmmoData CurrentDefaultAmmo) const;
 
 };

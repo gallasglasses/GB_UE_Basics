@@ -4,6 +4,7 @@
 #include "Player/TPlayerController.h"
 #include "Player/TPawn.h"
 #include "DrawDebugHelpers.h"
+#include "ActorPoolSubsystem.h"
 
 void ATPlayerController::BeginPlay()
 {
@@ -23,6 +24,7 @@ void ATPlayerController::SetupInputComponent()
 	InputComponent->BindAxis("RotateRight", this, &ATPlayerController::RotateRight);
     InputComponent->BindAction("Fire", IE_Pressed, this, &ATPlayerController::Fire);
 	InputComponent->BindAction("RifleFire", IE_Pressed, this, &ATPlayerController::StartRifleFire);
+    InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATPlayerController::NextWeapon);
 }
 
 void ATPlayerController::Tick(float DeltaSeconds)
@@ -78,4 +80,17 @@ void ATPlayerController::StartRifleFire()
 	{
 		TPawn->StartRifleFire();
 	}
+}
+
+void ATPlayerController::NextWeapon()
+{
+    if (TPawn)
+    {
+        TPawn->NextWeapon();
+    }
+}
+
+void ATPlayerController::DumpActorPoolSubsystemStats()
+{
+	GetWorld()->GetSubsystem<UActorPoolSubsystem>()->DumpPoolStats();
 }

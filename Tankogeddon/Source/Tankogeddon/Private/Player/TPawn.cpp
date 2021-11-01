@@ -10,7 +10,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
 
-DEFINE_LOG_CATEGORY(LogPawn);
+//DEFINE_LOG_CATEGORY(LogPawn);
 
 // Sets default values
 ATPawn::ATPawn()
@@ -46,7 +46,7 @@ void ATPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-    SetupCannon();
+    SetupCannon(DefaultCannonClass);
 }
 
 // Called every frame
@@ -57,14 +57,14 @@ void ATPawn::Tick(float DeltaTime)
     // forward or backward movement
     TCurrentAxisMoveForward = FMath::FInterpTo(TCurrentAxisMoveForward, TAxisMoveForward, DeltaTime, MovementSmoothness);
     FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TCurrentAxisMoveForward * MoveSpeed * DeltaTime;
-    SetActorLocation(NewLocation);
+    SetActorLocation(NewLocation, true);
 
     //rotation movement
     TCurrentAxisRotateRight = FMath::FInterpTo(TCurrentAxisRotateRight, TAxisRotateRight, DeltaTime, RotationSmoothness);
     float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
     SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
    
-    UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
+    //UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(S_TTurret->GetComponentLocation(), TurretTargetPosition);
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
@@ -90,30 +90,55 @@ void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 
 void ATPawn::Fire()
 {
-	if (TCannon)
+	if (TActiveCannon)
 	{
-		TCannon->Fire();
+		TActiveCannon->Fire();
 	}
 }
 
 void ATPawn::StartRifleFire()
 {
-    if (TCannon)
+    if (TActiveCannon)
     {
-        TCannon->StartRifleFire();
+        TActiveCannon->StartRifleFire();
     }
 }
 
-void ATPawn::SetupCannon()
+void ATPawn::SetupCannon(TSubclassOf<ATCannon> InCannonClass)
 {
-	if (TCannon)
+	if (TActiveCannon && TActiveCannon->GetClass() != InCannonClass)
 	{
-        TCannon->Destroy();
+        TInactiveCannon = TActiveCannon;
 	}
+	if (InCannonClass)
+	{
+		FActorSpawnParameters Params;
+		Params.Instigator = this;
+		Params.Owner = this;
+		TActiveCannon = GetWorld()->SpawnActor<ATCannon>(InCannonClass, Params);
+		TActiveCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
 
-	FActorSpawnParameters Params;
-	Params.Instigator = this;
-	Params.Owner = this;
-    TCannon = GetWorld()->SpawnActor<ATCannon>(DefaultCannonClass, Params);
-    TCannon->AttachToComponent(CannonSpawnPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+void ATPawn::NextWeapon()
+{
+    if (TActiveCannon && TInactiveCannon)
+    {
+		Swap(TActiveCannon, TInactiveCannon);
+
+		if (TActiveCannon)
+		{
+			TActiveCannon->SetVisibility(true);
+		}
+
+		if (TInactiveCannon)
+		{
+			TInactiveCannon->SetVisibility(false);
+		}
+    }
+}
+
+ATCannon* ATPawn::GetCannon()
+{
+    return TActiveCannon;
 }
