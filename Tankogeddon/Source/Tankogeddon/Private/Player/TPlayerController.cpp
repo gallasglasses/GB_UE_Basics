@@ -25,6 +25,7 @@ void ATPlayerController::SetupInputComponent()
     InputComponent->BindAction("Fire", IE_Pressed, this, &ATPlayerController::Fire);
 	InputComponent->BindAction("RifleFire", IE_Pressed, this, &ATPlayerController::StartRifleFire);
     InputComponent->BindAction("NextWeapon", IE_Pressed, this, &ATPlayerController::NextWeapon);
+    InputComponent->BindAxis("RotateTurretRight");
 }
 
 void ATPlayerController::Tick(float DeltaSeconds)
@@ -36,18 +37,33 @@ void ATPlayerController::Tick(float DeltaSeconds)
 		return;
 	}
 
-    FVector WorldMousePosition, WorldMouseDirection;
-    DeprojectMousePositionToWorld(WorldMousePosition, WorldMouseDirection);
+	FVector2D MouseScreenPosition;
+	GetMousePosition(MouseScreenPosition.X, MouseScreenPosition.Y);
+	bool bWasMouseMoved = !LastFrameMousePosition.Equals(MouseScreenPosition);
+	LastFrameMousePosition = MouseScreenPosition;
 
-    FVector TurretTargetDirection = WorldMousePosition - TPawn->GetActorLocation();
-    TurretTargetDirection.Z = 0.0f;
-    TurretTargetDirection.Normalize();
-    
-    FVector TurretTargetPosition = TPawn->GetActorLocation() + TurretTargetDirection * 1000.0f;
+	float TurretRotationAxis = GetInputAxisValue("RotateTurretRight");
+	if (FMath::IsNearlyZero(TurretRotationAxis) && (bWasMouseMoved || bIsControllingFromMouse))
+	{
+		bIsControllingFromMouse = true;
+		FVector WorldMousePosition, MouseDirection;
+		DeprojectMousePositionToWorld(WorldMousePosition, MouseDirection);
 
-    DrawDebugLine(GetWorld(), TPawn->GetActorLocation(), TurretTargetPosition, FColor::Green, false, 0.1f, 0, 5.0f);
+		FVector PawnPos = TPawn->GetActorLocation();
+		WorldMousePosition.Z = PawnPos.Z;
+		FVector NewTurretDirection = WorldMousePosition - PawnPos;
+		NewTurretDirection.Normalize();
 
-    TPawn->SetTurretTargetPosition(TurretTargetPosition);
+		FVector TurretTarget = PawnPos + NewTurretDirection * 1000.f;
+		TPawn->SetTurretTargetPosition(TurretTarget);
+	}
+	else
+	{
+		bIsControllingFromMouse = false;
+		TPawn->SetTurretRotationAxis(TurretRotationAxis);
+	}
+
+	DrawDebugLine(GetWorld(), TPawn->GetActorLocation(), TPawn->GetActorLocation() + TPawn->GetTurretForwardVector() * 1000.f, FColor::Green, false, 0.1f, 0.f, 5.f);
 }
 
 void ATPlayerController::MoveForward(float Amount)

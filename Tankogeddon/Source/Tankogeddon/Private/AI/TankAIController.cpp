@@ -71,6 +71,10 @@ void ATankAIController::MoveToNextPoint()
 void ATankAIController::Targeting()
 {
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if (!PlayerPawn)
+	{
+		return;
+	}
 	if (FVector::DistSquared(PlayerPawn->GetActorLocation(), TankPawn->GetActorLocation()) > FMath::Square(TargetingRange))
 	{
 		return;
@@ -79,7 +83,7 @@ void ATankAIController::Targeting()
 	FHitResult HitResult;
 	FVector TraceStart = TankPawn->GetActorLocation();
 	FVector TraceEnd = PlayerPawn->GetActorLocation();
-	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("AI Vission Trace")), true, this);
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("AI Vission Trace")), true, TankPawn);
 	TraceParams.bReturnPhysicalMaterial = false;
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))

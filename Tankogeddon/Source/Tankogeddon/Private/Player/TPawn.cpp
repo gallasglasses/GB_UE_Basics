@@ -12,6 +12,8 @@
 #include "GameStructs.h"
 #include "HealthComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Pickups/TAmmoPickup.h"
 
 //DEFINE_LOG_CATEGORY(LogPawn);
 
@@ -76,6 +78,12 @@ void ATPawn::Tick(float DeltaTime)
    
     //UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
+	if (!bIsTurretTargetSet)
+	{
+		TurretTargetDirection = TurretTargetDirection.RotateAngleAxis(RotationSmoothness * TurretRotationAxis, FVector::UpVector);
+		TurretTargetPosition = GetActorLocation() + TurretTargetDirection;
+	}
+
 	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(S_TTurret->GetComponentLocation(), TurretTargetPosition);
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
@@ -95,7 +103,15 @@ void ATPawn::RotateRight(float Amount)
 
 void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 {
-    TurretTargetPosition = TargetPosition;
+	TurretTargetPosition = TargetPosition; 
+	bIsTurretTargetSet = true;
+}
+
+void ATPawn::SetTurretRotationAxis(float AxisValue)
+{
+	TurretRotationAxis = AxisValue;
+	TurretTargetDirection = TurretTargetPosition - GetActorLocation();
+	bIsTurretTargetSet = false;
 }
 
 void ATPawn::Fire()
@@ -170,11 +186,23 @@ void ATPawn::OnHealthChanged_Implementation(float Damage)
 
 void ATPawn::OnDie_Implementation()
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathAudioEffect, GetActorLocation());
+
+	if (LootBox)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+		GetWorld()->SpawnActor<ATAmmoPickup>(LootBox, GetActorTransform(), SpawnParams);
+	}
+
 	Destroy();
 }
 
 void ATPawn::TakeDamage(const FDamageData& DamageData)
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitAudioEffect, GetActorLocation());
 	HealthComponent->TakeDamage(DamageData);
 }
 

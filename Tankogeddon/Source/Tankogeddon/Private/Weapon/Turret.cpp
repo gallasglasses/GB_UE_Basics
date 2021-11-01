@@ -13,6 +13,9 @@
 #include "../../Tankogeddon.h"
 #include "GameStructs.h"
 #include "HealthComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Pickups/TAmmoPickup.h"
 
 // Sets default values
 ATurret::ATurret()
@@ -104,6 +107,10 @@ bool ATurret::IsPlayerInRange()
 
 bool ATurret::CanFire()
 {
+	if (!PlayerVisibilityControl())
+	{
+		return false;
+	}
 	FVector TargetingDir = TurretMesh->GetForwardVector();
 	FVector DirToPlayer = PlayerPawn->GetActorLocation() - GetActorLocation();
 	DirToPlayer.Normalize();
@@ -126,6 +133,16 @@ void ATurret::OnHealthChanged_Implementation(float Damage)
 
 void ATurret::OnDie_Implementation()
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathAudioEffect, GetActorLocation());
+
+	if (LootBox)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bNoFail = true;
+		GetWorld()->SpawnActor<ATAmmoPickup>(LootBox, GetActorTransform(), SpawnParams);
+	}
+
 	Destroy();
 }
 
@@ -143,10 +160,32 @@ void ATurret::Tick(float DeltaTime)
 
 void ATurret::TakeDamage(const FDamageData& DamageData)
 {
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DestructionEffect, GetActorTransform().GetLocation(), GetActorTransform().GetRotation().Rotator(), FVector(3.0, 3.0, 3.0), true);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), DestructionAudioEffect, GetActorLocation());
 	HealthComponent->TakeDamage(DamageData);
 }
 
 int32 ATurret::GetScoresForKilling() const
 {
 	return ScoresForKilling;
+}
+
+bool ATurret::PlayerVisibilityControl()
+{
+	FHitResult HitResult;
+	FVector TraceStart = CannonSetupPoint->GetComponentLocation();
+	FVector TraceEnd = PlayerPawn->GetActorLocation();
+	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("Turret Vission Trace")), true, this);
+	TraceParams.bReturnPhysicalMaterial = false;
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, TraceParams))
+	{
+		DrawDebugLine(GetWorld(), TraceStart, HitResult.Location, FColor::Purple, false, 0.1f, 0, 5);
+		if (HitResult.Actor.Get())
+		{
+			return HitResult.Actor.Get() == PlayerPawn;
+		}
+	}
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Purple, false, 0.1f, 0, 5);
+	return false;
 }
