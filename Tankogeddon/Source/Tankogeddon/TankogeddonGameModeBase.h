@@ -7,8 +7,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "TankogeddonGameModeBase.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogTankogeddon, Log, All);
-
 /**
  * 
  */

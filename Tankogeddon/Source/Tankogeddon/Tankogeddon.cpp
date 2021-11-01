@@ -3,8 +3,6 @@
 #include "Tankogeddon.h"
 #include "Modules/ModuleManager.h"
 
-//DEFINE_LOG_CATEGORY(LogTankogeddon)
-
-//DECLARE_LOG_CATEGORY_EXTERN(LogTankogeddon, Log, All);
+DEFINE_LOG_CATEGORY(LogTankogeddon)
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Tankogeddon, "Tankogeddon" );

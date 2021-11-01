@@ -20,6 +20,7 @@ public class Tankogeddon : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[]
 		{
+			"Tankogeddon/Public/Level",
 			"Tankogeddon/Public/Components",
 			"Tankogeddon/Public/Pickup",
 			"Tankogeddon/Public/Player",

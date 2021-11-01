@@ -14,6 +14,7 @@
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Pickups/TAmmoPickup.h"
+#include "Particles/ParticleSystem.h"
 
 //DEFINE_LOG_CATEGORY(LogPawn);
 
@@ -164,6 +165,11 @@ void ATPawn::NextWeapon()
     }
 }
 
+void ATPawn::SetPatrollingPoints(const TArray<ATargetPoint*>& InPoints)
+{
+	PatrollingPoints = InPoints;
+}
+
 ATCannon* ATPawn::GetCannon()
 {
     return TActiveCannon;
@@ -174,7 +180,7 @@ FVector ATPawn::GetTurretForwardVector()
     return S_TTurret->GetForwardVector();
 }
 
-const TArray<FVector>& ATPawn::GetPatrollingPoints()
+const TArray<ATargetPoint*>& ATPawn::GetPatrollingPoints() const
 {
     return PatrollingPoints;
 }
@@ -195,7 +201,6 @@ void ATPawn::OnDie_Implementation()
 		SpawnParams.bNoFail = true;
 		GetWorld()->SpawnActor<ATAmmoPickup>(LootBox, GetActorTransform(), SpawnParams);
 	}
-
 	Destroy();
 }
 
