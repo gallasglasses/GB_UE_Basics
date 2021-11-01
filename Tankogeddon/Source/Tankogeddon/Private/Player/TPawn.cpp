@@ -9,6 +9,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameStructs.h"
+#include "HealthComponent.h"
+#include "Components/BoxComponent.h"
 
 //DEFINE_LOG_CATEGORY(LogPawn);
 
@@ -39,6 +42,13 @@ ATPawn::ATPawn()
 
 	CannonSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Cannon spawn point"));
     CannonSpawnPoint->SetupAttachment(S_TTurret);
+
+	HitCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Hit collider"));
+	HitCollider->SetupAttachment(S_TBody);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("Health component"));
+	HealthComponent->OnHealthChanged.AddDynamic(this, &ATPawn::OnHealthChanged);
+	HealthComponent->OnDie.AddDynamic(this, &ATPawn::OnDie);
 }
 
 // Called when the game starts or when spawned
@@ -141,4 +151,24 @@ void ATPawn::NextWeapon()
 ATCannon* ATPawn::GetCannon()
 {
     return TActiveCannon;
+}
+
+void ATPawn::OnHealthChanged_Implementation(float Damage)
+{
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Turret %s taked damage:%f "), *GetName(), Damage));
+}
+
+void ATPawn::OnDie_Implementation()
+{
+	Destroy();
+}
+
+void ATPawn::TakeDamage(const FDamageData& DamageData)
+{
+	HealthComponent->TakeDamage(DamageData);
+}
+
+int32 ATPawn::GetScoresForKilling() const
+{
+	return ScoresForKilling;
 }

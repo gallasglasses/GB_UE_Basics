@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Damageable.h"
+#include "Components/Scoreable.h"
 #include "TPawn.generated.h"
 
 //DECLARE_LOG_CATEGORY_EXTERN(LogPawn, All, All);
@@ -14,10 +16,12 @@ class UStaticMeshComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UArrowComponent;
+class UBoxComponent;
+class UHealthComponent;
 class ATCannon;
 
 UCLASS()
-class TANKOGEDDON_API ATPawn : public APawn
+class TANKOGEDDON_API ATPawn : public APawn, public IDamageable, public IScoreable
 {
 	GENERATED_BODY()
 
@@ -44,6 +48,12 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UArrowComponent* CannonSpawnPoint;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UBoxComponent* HitCollider;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UHealthComponent* HealthComponent;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float MoveSpeed = 1000.0f;
 
@@ -56,15 +66,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
 		float RotationSmoothness = 0.5f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret Fire Parametrs")
+		float ScoresForKilling = 10.0f;
+
 	/*UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		float TurretRotationSmoothness = 0.5f;*/
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Turret")
 		TSubclassOf<ATCannon> DefaultCannonClass;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+		void OnHealthChanged(float Damage);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Health")
+		void OnDie();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void TakeDamage(const FDamageData& DamageData) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 		void MoveForward(float Amount);
@@ -89,6 +109,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Turret")
 		ATCannon* GetCannon();
+
+	int32 GetScoresForKilling() const override;
 
 private:
 	UPROPERTY()
