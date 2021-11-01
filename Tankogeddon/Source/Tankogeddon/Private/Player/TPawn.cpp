@@ -55,22 +55,22 @@ void ATPawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
     // forward or backward movement
-    TCurrentAxisMoveForward = FMath::Lerp(TCurrentAxisMoveForward, TAxisMoveForward, MovementSmoothness);
+    TCurrentAxisMoveForward = FMath::FInterpTo(TCurrentAxisMoveForward, TAxisMoveForward, DeltaTime, MovementSmoothness);
     FVector NewLocation = GetActorLocation() + GetActorForwardVector() * TCurrentAxisMoveForward * MoveSpeed * DeltaTime;
     SetActorLocation(NewLocation);
 
     //rotation movement
-    TCurrentAxisRotateRight = FMath::Lerp(TCurrentAxisRotateRight, TAxisRotateRight, RotationSmoothness);
+    TCurrentAxisRotateRight = FMath::FInterpTo(TCurrentAxisRotateRight, TAxisRotateRight, DeltaTime, RotationSmoothness);
     float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
     SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
    
     UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
-	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TurretTargetPosition);
+	FRotator TargetRotation = UKismetMathLibrary::FindLookAtRotation(S_TTurret->GetComponentLocation(), TurretTargetPosition);
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
 	TargetRotation.Pitch = CurrentRotation.Pitch;
-    S_TTurret->SetWorldRotation(FMath::Lerp(CurrentRotation, TargetRotation, TurretRotationSmoothness));
+    S_TTurret->SetWorldRotation(FMath::RInterpConstantTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed));
 }
 
 void ATPawn::MoveForward(float Amount)
@@ -90,9 +90,17 @@ void ATPawn::SetTurretTargetPosition(const FVector& TargetPosition)
 
 void ATPawn::Fire()
 {
+	if (TCannon)
+	{
+		TCannon->Fire();
+	}
+}
+
+void ATPawn::StartRifleFire()
+{
     if (TCannon)
     {
-        TCannon->Fire();
+        TCannon->StartRifleFire();
     }
 }
 
