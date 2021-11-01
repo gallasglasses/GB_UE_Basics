@@ -74,6 +74,12 @@ void ATProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* Othe
 		return;
 	}
 
+	if (OtherComp->IsSimulatingPhysics())
+	{
+		FVector Impulse = Mass * MoveSpeed * GetActorForwardVector();
+		OtherComp->AddImpulseAtLocation(Impulse, SweepResult.ImpactPoint);
+	}
+
 	if (OtherActor && OtherComp && OtherComp->GetCollisionObjectType() == ECC_Destructible)
 	{
 		OtherActor->Destroy();

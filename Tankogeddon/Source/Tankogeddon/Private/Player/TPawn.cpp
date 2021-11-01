@@ -16,9 +16,6 @@
 #include "Pickups/TAmmoPickup.h"
 #include "Particles/ParticleSystem.h"
 
-//DEFINE_LOG_CATEGORY(LogPawn);
-
-// Sets default values
 ATPawn::ATPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -77,7 +74,7 @@ void ATPawn::Tick(float DeltaTime)
     float NewYawRotation = GetActorRotation().Yaw + TCurrentAxisRotateRight * RotationSpeed * DeltaTime;
     SetActorRotation(FRotator(0.f, NewYawRotation, 0.f));
    
-    //UE_LOG(LogPawn, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
+    //UE_LOG(LogTankogeddon, Verbose, TEXT("TCurrentAxisRotateRight: %f"), TCurrentAxisRotateRight);
 
 	if (!bIsTurretTargetSet)
 	{
