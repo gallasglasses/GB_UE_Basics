@@ -153,6 +153,16 @@ ATCannon* ATPawn::GetCannon()
     return TActiveCannon;
 }
 
+FVector ATPawn::GetTurretForwardVector()
+{
+    return S_TTurret->GetForwardVector();
+}
+
+const TArray<FVector>& ATPawn::GetPatrollingPoints()
+{
+    return PatrollingPoints;
+}
+
 void ATPawn::OnHealthChanged_Implementation(float Damage)
 {
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Purple, FString::Printf(TEXT("Turret %s taked damage:%f "), *GetName(), Damage));
@@ -166,6 +176,11 @@ void ATPawn::OnDie_Implementation()
 void ATPawn::TakeDamage(const FDamageData& DamageData)
 {
 	HealthComponent->TakeDamage(DamageData);
+}
+
+float ATPawn::GetMovementAccuracy()
+{
+    return MovementAccuracy;
 }
 
 int32 ATPawn::GetScoresForKilling() const

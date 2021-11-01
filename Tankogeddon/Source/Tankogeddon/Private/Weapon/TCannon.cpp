@@ -10,6 +10,10 @@
 #include "TProjectile.h"
 #include "ActorPoolSubsystem.h"
 #include "Components/Damageable.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Components/AudioComponent.h"
+#include "Camera/CameraShakeBase.h"
+#include "GameFramework/ForceFeedbackEffect.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCannon, All, All);
 
@@ -35,6 +39,12 @@ ATCannon::ATCannon()
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("Spawn point"));
 	ProjectileSpawnPoint->SetupAttachment(Mesh);
+
+	ShootEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("Shoot Effect"));
+	ShootEffect->SetupAttachment(ProjectileSpawnPoint);
+
+	AudioEffect = CreateDefaultSubobject<UAudioComponent>(TEXT("Audio Effect"));
+	AudioEffect->SetupAttachment(ProjectileSpawnPoint);
 }
 
 void ATCannon::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -215,6 +225,24 @@ void ATCannon::RifleShot()
 
 void ATCannon::Shot()
 {
+	ShootEffect->ActivateSystem();
+	AudioEffect->Play();
+
+	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		if (ShootForceEffect)
+		{
+			FForceFeedbackParameters Params;
+			Params.bLooping = false;
+			Params.Tag = TEXT("ShootFFParams");
+			GetWorld()->GetFirstPlayerController()->ClientPlayForceFeedback(ShootForceEffect);
+		}
+
+		if (ShootShake)
+		{
+			GetWorld()->GetFirstPlayerController()->ClientPlayCameraShake(ShootShake);
+		}
+	}
 	if (Type == ECannonType::FireProjectile)
 	{
 		if (IsAmmoEmpty(CurrentProjectileAmmo))
