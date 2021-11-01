@@ -11,6 +11,8 @@ class UStaticMeshComponent;
 class UArrowComponent;
 class UBoxComponent;
 class UHealthComponent;
+class UParticleSystem;
+class USoundBase;
 class ATPawn;
 class ATargetPoint;
 class AMapLoader;
@@ -29,6 +31,12 @@ protected:
 		UStaticMeshComponent* BuildingMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UStaticMeshComponent* BuildingWallMesh;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
+		UStaticMeshComponent* DestroyedMesh;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UArrowComponent* TankSpawnPoint;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -36,6 +44,15 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UHealthComponent* HealthComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* SpawnTankAudioEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		UParticleSystem* DeathFactoryEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+		USoundBase* DeathFactoryAudioEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Params")
 		AMapLoader* MapLoader;
@@ -65,4 +82,6 @@ public:
 
 private:
 	FTimerHandle SpawnTankTimerHandle;
+
+	bool bIsFactoryDestroyed = false;
 };

@@ -4,8 +4,9 @@
 #include "Level/MapLoader.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 AMapLoader::AMapLoader()
@@ -25,7 +26,7 @@ AMapLoader::AMapLoader()
 	DeactivatedLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("Deactivated lights"));
 	DeactivatedLight->SetupAttachment(SceneComp);
 
-	TriggerCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("Trigger collider"));
+	TriggerCollider = CreateDefaultSubobject<USphereComponent>(TEXT("Trigger collider"));
 	TriggerCollider->SetupAttachment(SceneComp);
 
 	TriggerCollider->OnComponentBeginOverlap.AddDynamic(this, &AMapLoader::OnTriggerOverlapBegin);
@@ -35,6 +36,7 @@ void AMapLoader::SetIsActivated(bool NewIsActivated)
 {
 	bIsActivated = NewIsActivated;
 	SetActiveLights();
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ActivatedAudioEffect, GetActorLocation());
 }
 
 // Called when the game starts or when spawned
@@ -61,6 +63,7 @@ void AMapLoader::OnTriggerOverlapBegin(UPrimitiveComponent* OverlappedComp, AAct
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 	if (OtherActor == PlayerPawn)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ActivatedAudioEffect, GetActorLocation());
 		UGameplayStatics::OpenLevel(GetWorld(), LoadLevelName);
 	}
 }
