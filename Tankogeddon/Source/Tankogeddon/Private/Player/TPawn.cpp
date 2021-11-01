@@ -70,7 +70,7 @@ void ATPawn::Tick(float DeltaTime)
 	FRotator CurrentRotation = S_TTurret->GetComponentRotation();
 	TargetRotation.Roll = CurrentRotation.Roll;
 	TargetRotation.Pitch = CurrentRotation.Pitch;
-    S_TTurret->SetWorldRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed), true);
+    S_TTurret->SetWorldRotation(FMath::RInterpConstantTo(CurrentRotation, TargetRotation, DeltaTime, RotationSpeed))
 }
 
 void ATPawn::MoveForward(float Amount)
