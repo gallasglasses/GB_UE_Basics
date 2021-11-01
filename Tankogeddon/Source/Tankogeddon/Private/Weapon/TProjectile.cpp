@@ -5,6 +5,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "..\..\Tankogeddon.h"
+#include "Components/Damageable.h"
 #include "ActorPoolSubsystem.h"
 
 // Sets default values
@@ -22,6 +23,7 @@ ATProjectile::ATProjectile()
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->OnComponentHit.AddDynamic(this, &ATProjectile::OnProjectileHit);
 	Mesh->SetHiddenInGame(true);
+	Mesh->IgnoreActorWhenMoving(GetOwner(), true);
 	RootComponent = Mesh;
 
 }
@@ -66,11 +68,25 @@ void ATProjectile::Tick(float DeltaTime)
 
 void ATProjectile::OnProjectileHit(UPrimitiveComponent* HittedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Black, TEXT("PEW"));
+	if (OtherActor == GetInstigator())
+	{
+		Destroy();
+		return;
+	}
+
 	if (OtherActor && OtherComp && OtherComp->GetCollisionObjectType() == ECC_Destructible)
 	{
 		OtherActor->Destroy();
 	}
-	Destroy();
+	else if (IDamageable* Damageable = Cast<IDamageable>(OtherActor))
+	{
+		FDamageData DamageData;
+		DamageData.DamageValue = DamageAmount;
+		DamageData.Instigator = GetInstigator();
+		DamageData.DamageMaker = this;
+		Damageable->TakeDamage(DamageData);
+	}
+
+	Stop();
 }
 

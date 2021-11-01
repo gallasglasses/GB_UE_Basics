@@ -193,6 +193,7 @@ void ATCannon::RifleShot()
 	ATProjectile* Projectile = Cast<ATProjectile>(Pool->RetreiveActor(ProjectileClass, SpawnTransform));
 	if (Projectile)
 	{
+		Projectile->SetInstigator(GetInstigator());
 		Projectile->Start();
 	}
 
@@ -218,10 +219,7 @@ void ATCannon::Shot()
 		if (IsAmmoEmpty(CurrentProjectileAmmo))
 		{
 			Reload();
-			bProjectileFire = false;
-			bTraceFire = true;
-			Destroy();
-			SetCannonType(ECannonType::FireTrace);
+			
 			return;
 		}
 		GEngine->AddOnScreenDebugMessage(INDEX_NONE, 1.0f, FColor::Green, TEXT("Fire projectile"));
@@ -231,6 +229,7 @@ void ATCannon::Shot()
 		ATProjectile* Projectile = Cast<ATProjectile>(Pool->RetreiveActor(ProjectileClass, SpawnTransform));
 		if (Projectile)
 		{
+			Projectile->SetInstigator(GetInstigator());
 			Projectile->Start();
 		}
 		DecreaseAmmo(CurrentProjectileAmmo);
@@ -240,10 +239,6 @@ void ATCannon::Shot()
 		if (IsAmmoEmpty(CurrentTraceAmmo))
 		{
 			Reload();
-			bProjectileFire = false;
-			bTraceFire = true;
-			Destroy();
-			SetCannonType(ECannonType::FireProjectile);
 			return;
 		}
 		FVector TraceStart, TraceEnd;
