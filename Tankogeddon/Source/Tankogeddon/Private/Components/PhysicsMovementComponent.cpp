@@ -39,9 +39,9 @@ void UPhysicsMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	}
 
 	APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
-	FVector NewActorLocation = Owner->GetActorLocation() + Velocity * DeltaTime - Gravity * FMath::Square(DeltaTime) / 2.f;
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("TargetRotation.Pitch %f"), Owner->GetActorRotation().Pitch));
-	Velocity += (-Gravity) * DeltaTime;
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("Velocity %f"), Velocity.Z));
+	FVector NewActorLocation = Owner->GetActorLocation() + Velocity * DeltaTime - FVector::UpVector * Gravity * FMath::Square(DeltaTime) / 2.f;
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("TargetRotation.Pitch %f"), Owner->GetActorRotation().Pitch));
+	Velocity += FVector::UpVector * (-Gravity) * DeltaTime;
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("Velocity %f"), Velocity.Z));
 	Owner->SetActorLocation(NewActorLocation, true);
 }

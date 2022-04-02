@@ -17,7 +17,7 @@ public:
 	UPhysicsMovementComponent();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Gravity params")
-		FVector Gravity = FVector(0.f, 0.f, -9.8f);
+		float Gravity = 980.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Gravity params")
 		FVector Velocity = FVector::ZeroVector;

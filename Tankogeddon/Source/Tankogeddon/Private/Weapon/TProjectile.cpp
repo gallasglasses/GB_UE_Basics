@@ -176,9 +176,9 @@ void ATProjectile::CheckSimulatingPhysics(UPrimitiveComponent* PHitMesh, AActor*
 		SpawnEffects();
 		FVector ForceVector = PHitActor->GetActorLocation() - GetActorLocation();
 		ForceVector.Normalize();
-		//HitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
-		PHitMesh->AddForce(ForceVector * ExplosionImpulse, NAME_None, true);
-		//HitMesh->AddForceAtLocation(ForceVector * ExplosionImpulse, SweepResult.ImpactPoint, NAME_None);
+		PHitMesh->AddImpulse(ForceVector * ExplosionImpulse, NAME_None, true);
+		//PHitMesh->AddForce(ForceVector * ExplosionImpulse, NAME_None, true);
+		//PHitMesh->AddForceAtLocation(ForceVector * ExplosionImpulse, SweepResult.ImpactPoint, NAME_None);
 	}
 }
 

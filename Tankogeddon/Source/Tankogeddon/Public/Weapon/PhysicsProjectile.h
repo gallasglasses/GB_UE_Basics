@@ -19,7 +19,7 @@ public:
 	virtual void Stop() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-protected:
+public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UPhysicsMovementComponent* MovementComponent;
 };

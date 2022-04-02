@@ -26,7 +26,7 @@ public:
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 		UStaticMeshComponent* Mesh;
-
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Projectile Fire Parametrs")
 		float MoveSpeed = 100.0f;
 

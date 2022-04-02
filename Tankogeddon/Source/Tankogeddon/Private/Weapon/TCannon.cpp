@@ -14,6 +14,8 @@
 #include "Components/AudioComponent.h"
 #include "Camera/CameraShakeBase.h"
 #include "GameFramework/ForceFeedbackEffect.h"
+#include "PhysicsProjectile.h"
+#include "PhysicsMovementComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCannon, All, All);
 
@@ -21,10 +23,7 @@ void ATCannon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	bReadyToFire = true;/*
-	CurrentRifleAmmo = DefaultRifleAmmoData;
-	CurrentProjectileAmmo = DefaultProjectileAmmoData;
-	CurrentTraceAmmo = DefaultTraceAmmoData;*/
+	bReadyToFire = true;
 }
 
 ATCannon::ATCannon()
@@ -122,6 +121,11 @@ bool ATCannon::IsReadyToFire()
 	return bReadyToFire;
 }
 
+bool ATCannon::IsBallistic() const
+{
+	return Type == ECannonType::FireProjectile && ProjectileClass && ProjectileClass->IsChildOf<APhysicsProjectile>();
+}
+
 void ATCannon::AddAmmo(ECannonType AmmoType, int32 AmmoAmount)
 {
 	int32 CountAmmo = 0,
@@ -155,6 +159,101 @@ void ATCannon::AddAmmo(ECannonType AmmoType, int32 AmmoAmount)
 void ATCannon::SetVisibility(bool bIsVisible)
 {
 	Mesh->SetHiddenInGame(!bIsVisible);
+}
+
+float ATCannon::FindElevationAngle(const FVector& InTarget)
+{
+	if (!IsBallistic())
+	{
+		return 0.0f;
+		//return false;
+	}
+
+	APhysicsProjectile* DefaultProjectile = ProjectileClass->GetDefaultObject<APhysicsProjectile>();
+	check(DefaultProjectile);
+
+	float Speed = DefaultProjectile->MoveSpeed;
+	float Gravity = DefaultProjectile->MovementComponent->Gravity;
+	if (FMath::IsNearlyZero(Gravity))
+	{
+		return 0.0f;
+		//return false;
+	}
+	float Z = ProjectileSpawnPoint->GetComponentLocation().Z;
+	//float Z = ProjectileSpawnPoint->GetComponentLocation().Z - InTarget.Z;
+	float X = FVector::Dist2D(ProjectileSpawnPoint->GetComponentLocation(), InTarget);
+	float Angle = 90.f;
+	if (!FMath::IsNearlyZero(X))
+	{
+		/*float FirstSqrtComp = FMath::Pow(Speed, 4);
+		float SecondSqrtComp = Gravity * (Gravity * FMath::Square(X) - 2 * (FMath::Square(Speed) * Z));
+		float SqrtComp = 0.0f;
+		if (FirstSqrtComp > SecondSqrtComp)
+		{
+			SqrtComp = FMath::Sqrt(FirstSqrtComp - SecondSqrtComp);
+		}
+		Angle = FMath::Atan((FMath::Square(Speed) + SqrtComp) / (Gravity * X));
+		Angle = FMath::RadiansToDegrees(Angle);*/
+		Angle = FMath::RadiansToDegrees(0.5f * (FMath::Acos(((Gravity * FMath::Square(X) / FMath::Square(Speed)) - Z) / FMath::Sqrt(FMath::Square(Z) + FMath::Square(X))) + FMath::Atan(X / Z)));
+	}
+
+	/*FRotator DesiredRotation = GetActorRotation();
+	DesiredRotation.Pitch = Angle;
+	SetActorRotation(DesiredRotation);*/
+	return Angle;
+}
+
+float ATCannon::FindDesiredBallisticTarget()
+{
+	if (!IsBallistic())
+	{
+		return 0.0f;
+	}
+
+	APhysicsProjectile* DefaultProjectile = ProjectileClass->GetDefaultObject<APhysicsProjectile>();
+	check(DefaultProjectile);
+
+	float ACathetus = DefaultProjectile->ExplosionRange;
+	float BCathetus = GetTargetRange(0.0f);
+	float Angle = FMath::RadiansToDegrees(FMath::Atan(ACathetus / BCathetus));
+
+	return Angle;
+}
+
+float ATCannon::GetTargetRange(float FloorAbsoluteHeight) const
+{
+	APhysicsProjectile* DefaultProjectile = ProjectileClass->GetDefaultObject<APhysicsProjectile>();
+	check(DefaultProjectile);
+	float Angle = FMath::DegreesToRadians(ProjectileSpawnPoint->GetForwardVector().Rotation().Pitch);
+	float Speed = DefaultProjectile->MoveSpeed;
+	float Gravity = DefaultProjectile->MovementComponent->Gravity;
+
+	float Z = ProjectileSpawnPoint->GetComponentLocation().Z - FloorAbsoluteHeight;
+	float TimeInAir = (Speed * FMath::Sin(Angle) + FMath::Sqrt(FMath::Square(Speed * FMath::Sin(Angle)) + 2 * Gravity * Z)) / Gravity;
+	float Range = Speed * FMath::Cos(Angle) * TimeInAir;
+	return Range;
+}
+
+FVector ATCannon::GetCurrentBallisticTarget(float FloorAbsoluteHeight) const
+{
+	if (!IsBallistic())
+	{
+		return GetActorLocation();
+	}
+	APhysicsProjectile* DefaultProjectile = ProjectileClass->GetDefaultObject<APhysicsProjectile>();
+	check(DefaultProjectile);
+	if (FMath::IsNearlyZero(DefaultProjectile->MovementComponent->Gravity))
+	{
+		return GetActorLocation();
+	}
+	float Range = GetTargetRange(FloorAbsoluteHeight);
+	FVector FlatDirection = ProjectileSpawnPoint->GetForwardVector();
+	FlatDirection.Z = 0.f;
+	FlatDirection.Normalize();
+	FVector Result = ProjectileSpawnPoint->GetComponentLocation() + FlatDirection * Range;
+	Result.Z = FloorAbsoluteHeight;
+	//GEngine->AddOnScreenDebugMessage(INDEX_NONE, 2.0f, FColor::Blue, FString::Printf(TEXT("Range %f"), Range));
+	return Result;
 }
 
 void ATCannon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const

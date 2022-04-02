@@ -99,6 +99,22 @@ private:
 	UPROPERTY()
 		APawn* PlayerPawn;
 
+	void FindPlayerLocation();
+	void FindPlayerVelocity();
+
+	FVector PreviousPlayerLocation;
+	FVector CurrentPlayerLocation;
+
+	FTimerHandle MovingTimerHandle;
+
+	float PlayerRotation;
+	float DesiredAimAngle;
+	float PlayerVelocity;
+	float MinimumPlayerVelocity = 500.0f;
+
+	bool bIsPlayerRotationPositive = true;
+	bool bIsPlayerMoving = true;
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void TakeDamage(const FDamageData& DamageData) override;
