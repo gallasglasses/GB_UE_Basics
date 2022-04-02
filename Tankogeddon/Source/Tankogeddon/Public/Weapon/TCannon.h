@@ -102,6 +102,13 @@ public:
 	void SetVisibility(bool bIsVisible);
 
 	bool IsReadyToFire();
+	bool IsBallistic() const;
+
+	float FindElevationAngle(const FVector& InTarget);
+	float FindDesiredBallisticTarget();
+	float GetTargetRange(float FloorAbsoluteHeight) const;
+
+	FVector GetCurrentBallisticTarget(float FloorAbsoluteHeight) const;
 
 	FAmmoData CurrentRifleAmmo = DefaultRifleAmmoData;
 	FAmmoData CurrentProjectileAmmo = DefaultProjectileAmmoData;
